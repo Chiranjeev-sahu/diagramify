@@ -12,7 +12,7 @@
     "dev": "nodemon -r dotenv/config index.js"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.2",
+    "brcypt": "^1.0.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",

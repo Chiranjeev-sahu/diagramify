@@ -1,32 +1,16 @@
-import express from "express";
+import { app } from "./app.js";
 import connectDB from "./src/config/connectDB.js";
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Basic middleware
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.json({
-    message: "Diagramify API is running!",
-    status: "success",
-    timestamp: new Date().toISOString(),
-  });
-});
-
-const startServer = async () => {
+// IFFE
+(async () => {
   try {
     await connectDB();
 
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-      console.log(`URL: http://localhost:${PORT}`);
+    app.listen(process.env.PORT, () => {
+      console.log(`Server is running on port ${process.env.PORT}`);
+      console.log(`URL: http://localhost:${process.env.PORT}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
     process.exit(1);
   }
-};
-
-startServer();
+})();
