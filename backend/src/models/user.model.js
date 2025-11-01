@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
-import { model, Schema } from "mongoose";
 import jwt from "jsonwebtoken";
+import { model, Schema } from "mongoose";
 
 const userSchema = new Schema(
   {
@@ -22,6 +22,12 @@ const userSchema = new Schema(
       required: true,
       select: false,
     },
+    diagramsGenerated: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Diagram",
+      },
+    ],
     refreshToken: {
       type: String,
       select: false,

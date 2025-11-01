@@ -1,6 +1,6 @@
-import { APIResponse } from "../utils/apiResponse.js";
 import { User } from "../models/user.model.js";
 import { APIError } from "../utils/apiError.js";
+import { APIResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendAuthResponseWithTokens } from "../utils/auth.utils.js"; // Import the new utility
 
@@ -25,10 +25,18 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!createdUser) {
     throw new APIError(500, "Something went wrong while registering the user");
   }
-
+  const userResponse = {
+    _id: createdUser._id,
+    username: createdUser.username,
+    email: createdUser.email,
+    diagramsGenerated:
+      createdUser.diagramsGenerated.length || "No diagrams generated yet", // Ensure diagramsGenerated is included if it exists or defaults to 0
+    createdAt: createdUser.createdAt,
+    updatedAt: createdUser.updatedAt,
+  };
   return await sendAuthResponseWithTokens(
     res,
-    createdUser,
+    userResponse,
     201,
     "User registered successfully and logged in",
   );
@@ -55,9 +63,19 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const loggedInUser = await User.findById(user._id);
 
+  const userResponse = {
+    _id: loggedInUser._id,
+    username: loggedInUser.username,
+    email: loggedInUser.email,
+    diagramsGenerated: loggedInUser.diagramsGenerated.length
+      ? loggedInUser.diagramsGenerated
+      : 0,
+    createdAt: loggedInUser.createdAt,
+    updatedAt: loggedInUser.updatedAt,
+  };
   return await sendAuthResponseWithTokens(
     res,
-    loggedInUser,
+    userResponse,
     200,
     "User logged In successfully",
   );
@@ -88,4 +106,4 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, {}, "User logged Out"));
 });
 
-export { registerUser, loginUser, logoutUser };
+export { loginUser, logoutUser, registerUser };
