@@ -3,12 +3,231 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// CLASSIFIER FUNCTION
+// --- REFACTORED SCHEMAS AND PROMPTS ---
+// Centralized to be used by both generation and parsing
+const DIAGRAM_SCHEMAS_AND_PROMPTS = {
+  Flowchart: {
+    schema: {
+      type: "object",
+      properties: {
+        diagramType: { type: "string", enum: ["Flowchart"] },
+        elements: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              type: {
+                type: "string",
+                enum: ["start", "end", "process", "decision", "inputoutput"],
+              },
+              text: { type: "string" },
+            },
+            required: ["id", "type", "text"],
+          },
+        },
+        connections: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              from: { type: "string" },
+              to: { type: "string" },
+              label: { type: "string", nullable: true },
+            },
+            required: ["from", "to"],
+          },
+        },
+      },
+      required: ["diagramType", "elements", "connections"],
+      propertyOrdering: ["diagramType", "elements", "connections"],
+    },
+    generationPrompt: `You are an AI assistant that generates structured JSON data for a Flowchart diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise flowchart. Only output the JSON.`,
+    parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Flowchart.
+Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
+- 'graph TD' means Flowchart.
+- A(Text) or A[Text] maps to {"id": "A", "type": "process", "text": "Text"}.
+- A((Text)) maps to {"id": "A", "type": "start", "text": "Text"} or {"id": "A", "type": "end", "text": "Text"}.
+- A{Text} maps to {"id": "A", "type": "decision", "text": "Text"}.
+- A[/Text/] maps to {"id": "A", "type": "inputoutput", "text": "Text"}.
+- A --> B maps to {"from": "A", "to": "B"}.
+- A -- "label" --> B maps to {"from": "A", "to": "B", "label": "label"}.
+Return ONLY the valid JSON.`,
+  },
+  Sequence: {
+    schema: {
+      type: "object",
+      properties: {
+        diagramType: { type: "string", enum: ["Sequence"] },
+        title: { type: "string", nullable: true },
+        actors: {
+          type: "array",
+          items: { type: "string" },
+        },
+        messages: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              sender: { type: "string" },
+              receiver: { type: "string" },
+              message: { type: "string" },
+              type: {
+                type: "string",
+                enum: ["sync", "async", "reply", "async_reply"],
+              },
+            },
+            required: ["sender", "receiver", "message", "type"],
+          },
+        },
+      },
+      required: ["diagramType", "actors", "messages"],
+      propertyOrdering: ["diagramType", "title", "actors", "messages"],
+    },
+    generationPrompt: `You are an AI assistant that generates structured JSON data for a Sequence diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise sequence diagram. Only output the JSON.`,
+    parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Sequence Diagram.
+Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
+- 'participant A' maps to an item in "actors".
+- 'title X' maps to {"title": "X"}.
+- A->>B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "sync"}.
+- A->>B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "async"}.
+- A-->B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "reply"}.
+- A-->>B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "async_reply"}.
+Return ONLY the valid JSON.`,
+  },
+  ER: {
+    schema: {
+      type: "object",
+      properties: {
+        diagramType: { type: "string", enum: ["ER"] },
+        entities: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              attributes: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    type: { type: "string" },
+                    key: {
+                      type: "string",
+                      enum: ["PK", "FK"],
+                      nullable: true,
+                    },
+                  },
+                  required: ["name", "type"],
+                },
+              },
+            },
+            required: ["name", "attributes"],
+          },
+        },
+        relationships: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              fromEntity: { type: "string" },
+              toEntity: { type: "string" },
+              relationshipType: {
+                type: "string",
+                enum: [
+                  "one-to-one",
+                  "one-to-many",
+                  "many-to-one",
+                  "many-to-many",
+                ],
+              },
+              label: { type: "string", nullable: true },
+            },
+            required: ["fromEntity", "toEntity", "relationshipType"],
+          },
+        },
+      },
+      required: ["diagramType", "entities", "relationships"],
+      propertyOrdering: ["diagramType", "entities", "relationships"],
+    },
+    generationPrompt: `You are an AI assistant that generates structured JSON data for an ER diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise ER diagram. Only output the JSON.`,
+    parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for an ER Diagram.
+Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
+- 'ENTITY {' maps to {"name": "ENTITY", "attributes": [...]}.
+- 'string name PK' maps to {"type": "string", "name": "name", "key": "PK"}.
+- 'int id' maps to {"type": "int", "name": "id"}.
+- A ||--|| B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "one-to-one", "label": "label"}.
+- A ||--o{ B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "one-to-many", "label": "label"}.
+- A }o--|| B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "many-to-one", "label": "label"}.
+- A }o--o{ B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "many-to-many", "label": "label"}.
+Return ONLY the valid JSON.`,
+  },
+  Gantt: {
+    schema: {
+      type: "object",
+      properties: {
+        diagramType: { type: "string", enum: ["Gantt"] },
+        title: { type: "string" },
+        dateFormat: {
+          type: "string",
+          description: "Date format string, e.g., 'YYYY-MM-DD'",
+        },
+        sections: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              tasks: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    start: {
+                      type: "string",
+                      description: "Task start date in YYYY-MM-DD format",
+                    },
+                    end: {
+                      type: "string",
+                      description: "Task end date in YYYY-MM-DD format",
+                    },
+                    id: { type: "string", nullable: true },
+                    status: {
+                      type: "string",
+                      enum: ["active", "done", "crit", "pending"],
+                      nullable: true,
+                    },
+                  },
+                  required: ["name", "start", "end"],
+                },
+              },
+            },
+            required: ["name", "tasks"],
+          },
+        },
+      },
+      required: ["diagramType", "title", "dateFormat", "sections"],
+      propertyOrdering: ["diagramType", "title", "dateFormat", "sections"],
+    },
+    generationPrompt: `You are an AI assistant that generates structured JSON data for a Gantt chart based on a user's natural language request. Ensure the output is valid JSON according to the schema. Dates must be in YYYY-MM-DD format. Provide a clear and concise Gantt chart. Only output the JSON.`,
+    parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Gantt Chart.
+Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
+- 'title X' maps to {"title": "X"}.
+- 'dateFormat YYYY-MM-DD' maps to {"dateFormat": "YYYY-MM-DD"}.
+- 'section Name' maps to {"name": "Name", "tasks": [...]}.
+- 'Task Name :done, 2024-01-01, 2024-01-02' maps to {"name": "Task Name", "status": "done", "start": "2024-01-01", "end": "2024-01-02"}.
+- 'Task Name : 2024-01-01, 2024-01-02' maps to {"name": "Task Name", "start": "2024-01-01", "end": "2024-01-02"}.
+Return ONLY the valid JSON.`,
+  },
+};
 
+// --- CLASSIFIER FUNCTION (Unchanged) ---
 export const classifyPromptDiagramTypes = async (promptText) => {
   console.log("classifyPromptDiagramTypes - START - Prompt:", promptText);
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const systemPrompt = `You are an expert diagram classifier. The user will provide a prompt.
 Your ONLY job is to identify which of the following diagram types are relevant to the prompt:
@@ -16,12 +235,6 @@ Your ONLY job is to identify which of the following diagram types are relevant t
 - "Sequence": For time-based interactions between actors.
 - "ER": For database schemas, entities, and relationships.
 - "Gantt": For project schedules, tasks, and dates.
-
-Example: "a user logs in" is relevant to "Flowchart" and "Sequence".
-Example: "a user has posts" is relevant to "ER".
-Example: "a project plan" is relevant to "Gantt".
-Example: "a happy dog" is not relevant to any.
-
 Return ONLY a JSON object matching the schema.`;
 
     const schema = {
@@ -54,9 +267,8 @@ Return ONLY a JSON object matching the schema.`;
         responseSchema: schema,
       },
     });
-
+    // ... (rest of the function is unchanged)
     const response = result.response;
-
     if (
       !response.candidates ||
       !response.candidates[0].content ||
@@ -68,22 +280,20 @@ Return ONLY a JSON object matching the schema.`;
       );
       throw new Error("Invalid response from AI classifier.");
     }
-
     const content = response.candidates[0].content.parts[0].text;
     const parsedData = JSON.parse(content);
     console.log(
       "classifyPromptDiagramTypes - END - Relevant Types:",
       parsedData.relevantTypes,
     );
-    return parsedData.relevantTypes; // e.g., ["Flowchart", "ER"]
+    return parsedData.relevantTypes;
   } catch (error) {
     console.error("classifyPromptDiagramTypes - ERROR:", error);
     throw new Error("Failed to classify prompt via AI.");
   }
 };
 
-// --- (Your existing `generateDiagramData` function goes here) ---
-// (This function is unchanged from our previous fix)
+// --- GENERATION FUNCTION (Refactored) ---
 export const generateDiagramData = async (promptText, diagramType) => {
   console.log(
     "generateDiagramData - START - Prompt:",
@@ -91,207 +301,24 @@ export const generateDiagramData = async (promptText, diagramType) => {
     "Type:",
     diagramType,
   );
-  let schema;
-  let systemPrompt;
+
+  const config = DIAGRAM_SCHEMAS_AND_PROMPTS[diagramType];
+
+  if (!config) {
+    const errorMessage = `generateDiagramData - ERROR: Unsupported diagram type: ${diagramType}`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  const { schema, generationPrompt } = config;
 
   try {
-    switch (diagramType) {
-      case "Flowchart":
-        schema = {
-          type: "object",
-          properties: {
-            diagramType: { type: "string", enum: ["Flowchart"] },
-            elements: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  id: { type: "string" },
-                  type: {
-                    type: "string",
-                    enum: [
-                      "start",
-                      "end",
-                      "process",
-                      "decision",
-                      "inputoutput",
-                    ],
-                  },
-                  text: { type: "string" },
-                },
-                required: ["id", "type", "text"],
-              },
-            },
-            connections: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  from: { type: "string" },
-                  to: { type: "string" },
-                  label: { type: "string", nullable: true },
-                },
-                required: ["from", "to"],
-              },
-            },
-          },
-          required: ["diagramType", "elements", "connections"],
-          propertyOrdering: ["diagramType", "elements", "connections"],
-        };
-        systemPrompt = `You are an AI assistant that generates structured JSON data for a Flowchart diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise flowchart. Only output the JSON.`;
-        break;
-      case "Sequence":
-        schema = {
-          type: "object",
-          properties: {
-            diagramType: { type: "string", enum: ["Sequence"] },
-            title: { type: "string" },
-            actors: {
-              type: "array",
-              items: { type: "string" },
-            },
-            messages: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  sender: { type: "string" },
-                  receiver: { type: "string" },
-                  message: { type: "string" },
-                  type: {
-                    type: "string",
-                    enum: ["sync", "async", "reply", "async_reply"],
-                  },
-                },
-                required: ["sender", "receiver", "message", "type"],
-              },
-            },
-          },
-          required: ["diagramType", "title", "actors", "messages"],
-          propertyOrdering: ["diagramType", "title", "actors", "messages"],
-        };
-        systemPrompt = `You are an AI assistant that generates structured JSON data for a Sequence diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise sequence diagram. Only output the JSON.`;
-        break;
-      case "ER":
-        schema = {
-          type: "object",
-          properties: {
-            diagramType: { type: "string", enum: ["ER"] },
-            entities: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  attributes: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        name: { type: "string" },
-                        type: { type: "string" },
-                        key: {
-                          type: "string",
-                          enum: ["PK", "FK"],
-                          nullable: true,
-                        },
-                      },
-                      required: ["name", "type"],
-                    },
-                  },
-                },
-                required: ["name", "attributes"],
-              },
-            },
-            relationships: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  fromEntity: { type: "string" },
-                  toEntity: { type: "string" },
-                  relationshipType: {
-                    type: "string",
-                    enum: [
-                      "one-to-one",
-                      "one-to-many",
-                      "many-to-one",
-                      "many-to-many",
-                    ],
-                  },
-                  label: { type: "string", nullable: true },
-                },
-                required: ["fromEntity", "toEntity", "relationshipType"],
-              },
-            },
-          },
-          required: ["diagramType", "entities", "relationships"],
-          propertyOrdering: ["diagramType", "entities", "relationships"],
-        };
-        systemPrompt = `You are an AI assistant that generates structured JSON data for an ER diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise ER diagram. Only output the JSON.`;
-        break;
-      case "Gantt":
-        schema = {
-          type: "object",
-          properties: {
-            diagramType: { type: "string", enum: ["Gantt"] },
-            title: { type: "string" },
-            dateFormat: {
-              type: "string",
-              description: "Date format string, e.g., 'YYYY-MM-DD'",
-            },
-            sections: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  tasks: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        name: { type: "string" },
-                        start: {
-                          type: "string",
-                          description: "Task start date in YYYY-MM-DD format",
-                        },
-                        end: {
-                          type: "string",
-                          description: "Task end date in YYYY-MM-DD format",
-                        },
-                        id: { type: "string", nullable: true },
-                        status: {
-                          type: "string",
-                          enum: ["active", "done", "crit", "pending"],
-                          nullable: true,
-                        },
-                      },
-                      required: ["name", "start", "end"],
-                    },
-                  },
-                },
-                required: ["name", "tasks"],
-              },
-            },
-          },
-          required: ["diagramType", "title", "dateFormat", "sections"],
-          propertyOrdering: ["diagramType", "title", "dateFormat", "sections"],
-        };
-        systemPrompt = `You are an AI assistant that generates structured JSON data for a Gantt chart based on a user's natural language request. Ensure the output is valid JSON according to the schema. Dates must be in YYYY-MM-DD format. Provide a clear and concise Gantt chart. Only output the JSON.`;
-        break;
-      default:
-        const errorMessage = `generateDiagramData - ERROR: Unsupported diagram type: ${diagramType}`;
-        console.error(errorMessage);
-        throw new Error(errorMessage);
-    }
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const result = await model.generateContent({
       systemInstruction: {
         role: "model",
-        parts: [{ text: systemPrompt }],
+        parts: [{ text: generationPrompt }],
       },
       contents: [
         {
@@ -339,7 +366,6 @@ export const generateDiagramData = async (promptText, diagramType) => {
     return parsedData;
   } catch (error) {
     console.error(`generateDiagramData (Type: ${diagramType}) - ERROR:`, error);
-    // Re-throw the error so Promise.allSettled can catch it as 'rejected'
     throw new Error(
       `Failed to generate ${diagramType} diagram: ${error.message}`,
     );
@@ -348,15 +374,73 @@ export const generateDiagramData = async (promptText, diagramType) => {
   }
 };
 
-// --- (Your existing `interpretPromptToInstruction` and `manipulateDiagramData` functions go here) ---
-// (No changes are needed for them)
+// --- NEW FUNCTION (Code-to-JSON Parser) ---
+export const parseMermaidToJSON = async (mermaidCode, diagramType) => {
+  console.log(`parseMermaidToJSON - START - Type: ${diagramType}`, mermaidCode);
+
+  const config = DIAGRAM_SCHEMAS_AND_PROMPTS[diagramType];
+  if (!config) {
+    const errorMessage = `parseMermaidToJSON - ERROR: Unsupported diagram type: ${diagramType}`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  const { schema, parsingPrompt } = config;
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const result = await model.generateContent({
+      systemInstruction: {
+        role: "model",
+        parts: [{ text: parsingPrompt }],
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: mermaidCode }],
+        },
+      ],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
+    });
+
+    const response = result.response;
+
+    if (
+      !response.candidates ||
+      !response.candidates[0].content ||
+      !response.candidates[0].content.parts
+    ) {
+      console.error(
+        `parseMermaidToJSON - ERROR: Invalid response from LLM for ${diagramType}`,
+        response,
+      );
+      throw new Error("Invalid response from AI parser.");
+    }
+
+    const content = response.candidates[0].content.parts[0].text;
+    const parsedData = JSON.parse(content);
+    console.log(`parseMermaidToJSON - END - Parsed Data:`, parsedData);
+    return parsedData;
+  } catch (error) {
+    console.error(`parseMermaidToJSON (Type: ${diagramType}) - ERROR:`, error);
+    throw new Error(
+      `Failed to parse ${diagramType} code via AI: ${error.message}`,
+    );
+  }
+};
+
+// --- REPROMPT/MANIPULATION FUNCTIONS (Unchanged) ---
 export const interpretPromptToInstruction = async (
   naturalLanguagePrompt,
   currentDiagramData,
 ) => {
   console.log("interpretPromptToInstruction - START");
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const systemPrompt = `You are an AI assistant designed to convert a user's natural language request for diagram modification into a structured JSON instruction.
 The current diagram data is provided to help resolve references (e.g., node names to IDs).
 Output only a JSON object following these rules:
@@ -427,6 +511,7 @@ Return ONLY the JSON instruction.`;
         },
       },
     });
+    // ... (rest of the function is unchanged)
     const response = result.response;
     if (
       !response.candidates ||
@@ -456,7 +541,7 @@ export const manipulateDiagramData = async (
 ) => {
   console.log("manipulateDiagramData - START");
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Using 1.5-flash
     const systemPrompt = `You are an AI assistant designed to strictly modify diagram data (JSON) based on a structured JSON instruction.
 Do not interpret natural language. Apply the changes precisely to the current_diagram_data.
 Output only the modified diagram data JSON. Ensure the output is valid JSON.
@@ -475,14 +560,17 @@ Structured Instruction:
 ${JSON.stringify(structuredInstruction, null, 2)}
 \`\`\``;
 
-    // This is a generic schema just to ensure the output is a valid diagram.
-    const outputSchema = {
-      type: "object",
-      properties: {
-        diagramType: { type: "string" },
-      },
-      required: ["diagramType"],
-    };
+    const diagramType = currentDiagramData.diagramType;
+
+    const config = DIAGRAM_SCHEMAS_AND_PROMPTS[diagramType];
+
+    if (!config || !config.schema) {
+      const errorMessage = `manipulateDiagramData - ERROR: No schema found for diagram type: ${diagramType}`;
+      console.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const selectedSchema = config.schema;
 
     const result = await model.generateContent({
       systemInstruction: {
@@ -497,10 +585,11 @@ ${JSON.stringify(structuredInstruction, null, 2)}
       ],
       generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: outputSchema,
+        // Use the dynamically selected schema, not the old generic one
+        responseSchema: selectedSchema,
       },
     });
-
+    // ... (rest of the function is unchanged)
     const response = result.response;
     if (
       !response.candidates ||

@@ -19,7 +19,7 @@ const diagramSchema = new Schema(
     },
     diagramType: {
       type: String,
-      enum: ["Flowchart", "Sequence Diagram", "ER Diagram", "Gantt Chart"],
+      enum: ["Flowchart", "Sequence", "ER", "Gantt"],
       required: true,
     },
     diagramData: {

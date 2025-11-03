@@ -3,17 +3,29 @@ import { User } from "../models/user.model.js";
 import {
   classifyPromptDiagramTypes,
   generateDiagramData,
+  interpretPromptToInstruction,
+  manipulateDiagramData,
 } from "../utils/ai.utils.js";
 import { APIError } from "../utils/apiError.js";
 import { APIResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {
+  // Individual converters (for generateDiagrams)
   convertERDiagramDataToMermaid,
   convertFlowchartDataToMermaid,
   convertGanttChartDataToMermaid,
   convertSequenceDiagramDataToMermaid,
+  // Dispatcher (for repromptDiagram)
+  diagramDataToMermaidCode,
+  // Parser (for updateDiagramCode)
+  mermaidCodeToDiagramData,
 } from "../utils/diagram.converter.js";
 
+/**
+ * 1. generateDiagrams (Initial Generation)
+ * Route: POST /api/diagrams/generate
+ * (This is your provided function)
+ */
 export const generateDiagrams = asyncHandler(async (req, res) => {
   console.log("generateDiagrams - START");
   const { prompt } = req.body;
@@ -70,8 +82,6 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
     }
   });
 
-  // If *all* of them failed (e.g., 2 were relevant, 2 failed),
-  // then we should tell the user.
   if (generatedDiagramData.length === 0) {
     console.error(
       "generateDiagrams - All relevant diagram generations failed.",
@@ -176,4 +186,234 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
   return res.json(
     new APIResponse(201, createdDiagrams, "Generation Successful"),
   );
+});
+
+// --- NEW CONTROLLERS ---
+
+/**
+ * 2. repromptDiagram (Conversational Editing)
+ * Route: PUT /api/diagrams/:id/reprompt
+ */
+export const repromptDiagram = asyncHandler(async (req, res) => {
+  const { newPrompt } = req.body;
+  const parentDiagramId = req.params.id;
+  const userId = req.user._id;
+
+  if (!newPrompt) {
+    throw new APIError(400, "Re-prompt text is required");
+  }
+
+  const parentDiagram = await Diagram.findById(parentDiagramId);
+  if (!parentDiagram) {
+    throw new APIError(404, "Original diagram not found");
+  }
+
+  if (parentDiagram.userId.toString() !== userId.toString()) {
+    throw new APIError(403, "You are not authorized to edit this diagram");
+  }
+
+  const current_diagramData = parentDiagram.diagramData;
+  const current_version = parentDiagram.version;
+
+  // AI Call (Step 1 - Interpretation)
+  const structured_instruction = await interpretPromptToInstruction(
+    newPrompt,
+    current_diagramData,
+  );
+
+  // AI Call (Step 2 - Manipulation)
+  const new_diagramData = await manipulateDiagramData(
+    current_diagramData,
+    structured_instruction,
+  );
+
+  // Conversion Call (using the dispatcher)
+  const new_diagramCode = diagramDataToMermaidCode(new_diagramData);
+
+  // DB Call (Write New Version)
+  const newDiagramVersion = await Diagram.create({
+    userId: userId,
+    promptText: newPrompt,
+    parentDiagramId: parentDiagramId, // Links to the previous version
+    diagramType: parentDiagram.diagramType, // It's the same type
+    diagramData: new_diagramData,
+    diagramCode: new_diagramCode,
+    isSaved: parentDiagram.isSaved, // Inherits saved state
+    version: current_version + 1,
+  });
+
+  // DB Call (Update User)
+  await User.findByIdAndUpdate(userId, {
+    $push: { diagramsGenerated: newDiagramVersion._id },
+  });
+
+  return res
+    .status(200)
+    .json(
+      new APIResponse(200, newDiagramVersion, "Diagram updated successfully"),
+    );
+});
+
+/**
+ * 3. saveDiagram (Saving a Diagram)
+ * Route: PATCH /api/diagrams/:id/save
+ */
+export const saveDiagram = asyncHandler(async (req, res) => {
+  const { title } = req.body;
+  const diagramId = req.params.id;
+  const userId = req.user._id;
+
+  if (!title) {
+    throw new APIError(400, "A title is required to save the diagram");
+  }
+
+  const diagramToSave = await Diagram.findById(diagramId);
+  if (!diagramToSave) {
+    throw new APIError(404, "Diagram not found");
+  }
+
+  if (diagramToSave.userId.toString() !== userId.toString()) {
+    throw new APIError(403, "Forbidden");
+  }
+
+  // Atomically update the diagram
+  const savedDiagram = await Diagram.findByIdAndUpdate(
+    diagramId,
+    {
+      $set: {
+        isSaved: true,
+        title: title, // Add title to the diagram model
+      },
+    },
+    { new: true }, // Return the updated document
+  );
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, savedDiagram, "Diagram saved to 'My Diagrams'"));
+});
+
+/**
+ * 4. updateDiagramCode (Advanced Code Editor)
+ * Route: PUT /api/diagrams/:id/code
+ */
+export const updateDiagramCode = asyncHandler(async (req, res) => {
+  const { newDiagramCode } = req.body;
+  const diagramId = req.params.id;
+  const userId = req.user._id;
+
+  if (!newDiagramCode) {
+    throw new APIError(400, "Diagram code cannot be empty");
+  }
+
+  const diagramToUpdate = await Diagram.findById(diagramId);
+  if (!diagramToUpdate) {
+    throw new APIError(404, "Diagram not found");
+  }
+
+  if (diagramToUpdate.userId.toString() !== userId.toString()) {
+    throw new APIError(403, "Forbidden");
+  }
+
+  // Code-to-Data Sync (REAL IMPLEMENTATION)
+  // This now calls the async AI parser
+  const new_diagramData = await mermaidCodeToDiagramData(
+    newDiagramCode,
+    diagramToUpdate.diagramType,
+  );
+
+  // DB Call (Update)
+  const updatedDiagram = await Diagram.findByIdAndUpdate(
+    diagramId,
+    {
+      $set: {
+        diagramCode: newDiagramCode,
+        diagramData: new_diagramData, // Update data as well
+      },
+    },
+    { new: true },
+  );
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, updatedDiagram, "Diagram code updated"));
+});
+
+/**
+ * 5. getAllUserDiagrams (Get "My Diagrams")
+ * Route: GET /api/diagrams
+ */
+export const getAllUserDiagrams = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  // Option B (Populating User - As per your plan)
+  const user = await User.findById(userId).populate({
+    path: "diagramsGenerated",
+    match: { isSaved: true }, // Only populate diagrams where isSaved is true
+    options: { sort: { updatedAt: -1 } },
+  });
+
+  if (!user) {
+    throw new APIError(404, "User not found");
+  }
+
+  const savedDiagrams = user.diagramsGenerated;
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, savedDiagrams, "Retrieved saved diagrams"));
+});
+
+/**
+ * 6. getDiagramById (Get One Diagram)
+ * Route: GET /api/diagrams/:id
+ */
+export const getDiagramById = asyncHandler(async (req, res) => {
+  const diagramId = req.params.id;
+  const userId = req.user._id;
+
+  const diagram = await Diagram.findById(diagramId);
+
+  if (!diagram) {
+    throw new APIError(404, "Diagram not found");
+  }
+
+  if (diagram.userId.toString() !== userId.toString()) {
+    throw new APIError(403, "You are not authorized to view this diagram");
+  }
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, diagram, "Diagram retrieved"));
+});
+
+/**
+ * 7. deleteDiagram (Delete a Diagram)
+ * Route: DELETE /api/diagrams/:id
+ */
+export const deleteDiagram = asyncHandler(async (req, res) => {
+  const diagramId = req.params.id;
+  const userId = req.user._id;
+
+  const diagram = await Diagram.findById(diagramId);
+
+  if (!diagram) {
+    throw new APIError(404, "Diagram not found");
+  }
+
+  if (diagram.userId.toString() !== userId.toString()) {
+    throw new APIError(403, "Forbidden");
+  }
+
+  // DB Call (Delete)
+  await Diagram.findByIdAndDelete(diagramId);
+
+  // DB Call (Update User)
+  await User.findByIdAndUpdate(userId, {
+    $pull: { diagramsGenerated: diagramId },
+  });
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, {}, "Diagram deleted successfully"));
 });

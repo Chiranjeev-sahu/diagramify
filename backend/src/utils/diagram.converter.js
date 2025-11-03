@@ -1,3 +1,5 @@
+import { parseMermaidToJSON } from "./ai.utils.js";
+
 /**
  * Converts structured diagramData (JSON) into Mermaid.js code for a Flowchart.
  * @param {object} diagramData - The structured JSON data for the flowchart.
@@ -332,16 +334,10 @@ export const convertGanttChartDataToMermaid = (diagramData) => {
       section.tasks.forEach((task) => {
         console.log("convertGanttChartDataToMermaid - Processing task:", task);
 
-        // This logic is now simple and robust because we *know*
-        // the AI schema (from ai.utils.js) *requires*
-        // 'name', 'start', and 'end'. No complex fallbacks needed.
-
         let taskLine = `        ${task.name} :`;
         if (task.status) {
           taskLine += `${task.status}, `; // e.g., "done, "
         }
-
-        // We can rely on start and end existing.
         taskLine += `${task.start}, ${task.end}`;
 
         mermaidCode += `${taskLine}\n`;
@@ -368,6 +364,7 @@ export const convertGanttChartDataToMermaid = (diagramData) => {
 
 /**
  * Main dispatcher function to convert diagramData to Mermaid.js code based on diagramType.
+ * (Used by reprompt controller)
  * @param {object} diagramData - The structured JSON data of the diagram.
  ** @returns {string} The Mermaid.js code string.
  */
@@ -385,8 +382,6 @@ export const diagramDataToMermaidCode = (diagramData) => {
 
   let mermaidCode = "";
   try {
-    // This dispatcher calls the correct translator function
-    // based on the 'diagramType' provided by the AI.
     switch (diagramData.diagramType) {
       case "Flowchart":
         mermaidCode = convertFlowchartDataToMermaid(diagramData);
@@ -419,4 +414,35 @@ export const diagramDataToMermaidCode = (diagramData) => {
 
   console.log("diagramDataToMermaidCode - END - Mermaid code:", mermaidCode);
   return mermaidCode;
+};
+
+/**
+ * Converts Mermaid.js code back into structured diagramData JSON using AI.
+ * (Used by the 'update code' controller)
+ * @param {string} mermaidCode - The Mermaid.js code.
+ * @param {string} diagramType - The type of diagram to parse as.
+ * @returns {Promise<object>} The structured diagramData JSON.
+ */
+export const mermaidCodeToDiagramData = async (mermaidCode, diagramType) => {
+  console.log("mermaidCodeToDiagramData - START", diagramType);
+  if (!diagramType) {
+    throw new Error("diagramType is required to parse Mermaid code.");
+  }
+
+  try {
+    // Use the new AI parsing function
+    const parsedData = await parseMermaidToJSON(mermaidCode, diagramType);
+    return parsedData;
+  } catch (error) {
+    console.error(
+      `mermaidCodeToDiagramData - ERROR: Failed to parse code for ${diagramType}:`,
+      error,
+    );
+    // If parsing fails, we still save the code but return a minimal
+    // data object to prevent a crash.
+    return {
+      diagramType: diagramType,
+      error: "Failed to parse code, but code was saved.",
+    };
+  }
 };
