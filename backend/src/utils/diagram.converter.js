@@ -245,7 +245,11 @@ export const convertERDiagramDataToMermaid = (diagramData) => {
           relationshipString += `|--|`; // Default
       }
       // Labels MUST be in quotes for Mermaid syntax
-      relationshipString += ` ${rel.toEntity} : "${rel.label || ""}"\n`;
+      const escapedLabel = (rel.label || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/"/g, '\\"');
+
+      relationshipString += ` ${rel.toEntity} : "${escapedLabel}"\n`;
       mermaidCode += relationshipString;
       console.log(
         "convertERDiagramDataToMermaid - Added relationship:",
