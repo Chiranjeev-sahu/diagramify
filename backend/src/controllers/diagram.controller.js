@@ -10,22 +10,15 @@ import { APIError } from "../utils/apiError.js";
 import { APIResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {
-  // Individual converters (for generateDiagrams)
+  // converters for generateDiagrams
   convertERDiagramDataToMermaid,
   convertFlowchartDataToMermaid,
   convertGanttChartDataToMermaid,
   convertSequenceDiagramDataToMermaid,
-  // Dispatcher (for repromptDiagram)
   diagramDataToMermaidCode,
-  // Parser (for updateDiagramCode)
   mermaidCodeToDiagramData,
 } from "../utils/diagram.converter.js";
 
-/**
- * 1. generateDiagrams (Initial Generation)
- * Route: POST /api/diagrams/generate
- * (This is your provided function)
- */
 export const generateDiagrams = asyncHandler(async (req, res) => {
   console.log("generateDiagrams - START");
   const { prompt } = req.body;
@@ -33,12 +26,22 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
     console.warn("generateDiagrams - ERROR: Prompt text required");
     throw new APIError(400, "Prompt text required");
   }
+
+  const escapedPrompt = prompt
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
+  if (!escapedPrompt) {
+    console.warn("generateDiagrams - ERROR: Prompt text required");
+    throw new APIError(400, "Prompt text required");
+  }
   const userId = req.user._id;
-  console.log("generateDiagrams - User ID:", userId);
 
   let relevantTypes;
   try {
-    relevantTypes = await classifyPromptDiagramTypes(prompt);
+    relevantTypes = await classifyPromptDiagramTypes(escapedPrompt);
   } catch (error) {
     console.error(
       "generateDiagrams - ERROR: Failed to classify prompt:",
@@ -58,10 +61,8 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
     );
   }
 
-  console.log("generateDiagrams - Classified relevant types:", relevantTypes);
-
   const generationPromises = relevantTypes.map((type) =>
-    generateDiagramData(prompt, type),
+    generateDiagramData(escapedPrompt, type),
   );
 
   console.log(
@@ -94,7 +95,6 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
     generatedDiagramData,
   );
 
-  // --- STEP 3: CONVERT AND SAVE (This logic is the same as v1) ---
   const saveDiagrams = generatedDiagramData.map(async (diagramData) => {
     if (!diagramData) {
       console.warn("generateDiagrams - Skipping null diagram data.");
@@ -188,18 +188,17 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
   );
 });
 
-// --- NEW CONTROLLERS ---
-
-/**
- * 2. repromptDiagram (Conversational Editing)
- * Route: PUT /api/diagrams/:id/reprompt
- */
 export const repromptDiagram = asyncHandler(async (req, res) => {
   const { newPrompt } = req.body;
   const parentDiagramId = req.params.id;
   const userId = req.user._id;
-
-  if (!newPrompt) {
+  const escapedNewPrompt = newPrompt.prompt
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
+  if (!escapedNewPrompt) {
     throw new APIError(400, "Re-prompt text is required");
   }
 
@@ -215,34 +214,29 @@ export const repromptDiagram = asyncHandler(async (req, res) => {
   const current_diagramData = parentDiagram.diagramData;
   const current_version = parentDiagram.version;
 
-  // AI Call (Step 1 - Interpretation)
   const structured_instruction = await interpretPromptToInstruction(
-    newPrompt,
+    escapedNewPrompt,
     current_diagramData,
   );
 
-  // AI Call (Step 2 - Manipulation)
   const new_diagramData = await manipulateDiagramData(
     current_diagramData,
     structured_instruction,
   );
 
-  // Conversion Call (using the dispatcher)
   const new_diagramCode = diagramDataToMermaidCode(new_diagramData);
 
-  // DB Call (Write New Version)
   const newDiagramVersion = await Diagram.create({
     userId: userId,
     promptText: newPrompt,
-    parentDiagramId: parentDiagramId, // Links to the previous version
-    diagramType: parentDiagram.diagramType, // It's the same type
+    parentDiagramId: parentDiagramId,
+    diagramType: parentDiagram.diagramType,
     diagramData: new_diagramData,
     diagramCode: new_diagramCode,
-    isSaved: parentDiagram.isSaved, // Inherits saved state
+    isSaved: parentDiagram.isSaved,
     version: current_version + 1,
   });
 
-  // DB Call (Update User)
   await User.findByIdAndUpdate(userId, {
     $push: { diagramsGenerated: newDiagramVersion._id },
   });
@@ -254,15 +248,10 @@ export const repromptDiagram = asyncHandler(async (req, res) => {
     );
 });
 
-/**
- * 3. saveDiagram (Saving a Diagram)
- * Route: PATCH /api/diagrams/:id/save
- */
 export const saveDiagram = asyncHandler(async (req, res) => {
   const { title } = req.body;
   const diagramId = req.params.id;
   const userId = req.user._id;
-
   if (!title) {
     throw new APIError(400, "A title is required to save the diagram");
   }
@@ -276,16 +265,15 @@ export const saveDiagram = asyncHandler(async (req, res) => {
     throw new APIError(403, "Forbidden");
   }
 
-  // Atomically update the diagram
   const savedDiagram = await Diagram.findByIdAndUpdate(
     diagramId,
     {
       $set: {
         isSaved: true,
-        title: title, // Add title to the diagram model
+        title: title,
       },
     },
-    { new: true }, // Return the updated document
+    { new: true },
   );
 
   return res
@@ -293,10 +281,6 @@ export const saveDiagram = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, savedDiagram, "Diagram saved to 'My Diagrams'"));
 });
 
-/**
- * 4. updateDiagramCode (Advanced Code Editor)
- * Route: PUT /api/diagrams/:id/code
- */
 export const updateDiagramCode = asyncHandler(async (req, res) => {
   const { newDiagramCode } = req.body;
   const diagramId = req.params.id;
@@ -315,20 +299,17 @@ export const updateDiagramCode = asyncHandler(async (req, res) => {
     throw new APIError(403, "Forbidden");
   }
 
-  // Code-to-Data Sync (REAL IMPLEMENTATION)
-  // This now calls the async AI parser
   const new_diagramData = await mermaidCodeToDiagramData(
     newDiagramCode,
     diagramToUpdate.diagramType,
   );
 
-  // DB Call (Update)
   const updatedDiagram = await Diagram.findByIdAndUpdate(
     diagramId,
     {
       $set: {
         diagramCode: newDiagramCode,
-        diagramData: new_diagramData, // Update data as well
+        diagramData: new_diagramData,
       },
     },
     { new: true },
@@ -339,17 +320,12 @@ export const updateDiagramCode = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, updatedDiagram, "Diagram code updated"));
 });
 
-/**
- * 5. getAllUserDiagrams (Get "My Diagrams")
- * Route: GET /api/diagrams
- */
 export const getAllUserDiagrams = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
-  // Option B (Populating User - As per your plan)
   const user = await User.findById(userId).populate({
     path: "diagramsGenerated",
-    match: { isSaved: true }, // Only populate diagrams where isSaved is true
+    match: { isSaved: true },
     options: { sort: { updatedAt: -1 } },
   });
 
@@ -364,10 +340,6 @@ export const getAllUserDiagrams = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, savedDiagrams, "Retrieved saved diagrams"));
 });
 
-/**
- * 6. getDiagramById (Get One Diagram)
- * Route: GET /api/diagrams/:id
- */
 export const getDiagramById = asyncHandler(async (req, res) => {
   const diagramId = req.params.id;
   const userId = req.user._id;
@@ -387,10 +359,6 @@ export const getDiagramById = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, diagram, "Diagram retrieved"));
 });
 
-/**
- * 7. deleteDiagram (Delete a Diagram)
- * Route: DELETE /api/diagrams/:id
- */
 export const deleteDiagram = asyncHandler(async (req, res) => {
   const diagramId = req.params.id;
   const userId = req.user._id;
@@ -405,10 +373,8 @@ export const deleteDiagram = asyncHandler(async (req, res) => {
     throw new APIError(403, "Forbidden");
   }
 
-  // DB Call (Delete)
   await Diagram.findByIdAndDelete(diagramId);
 
-  // DB Call (Update User)
   await User.findByIdAndUpdate(userId, {
     $pull: { diagramsGenerated: diagramId },
   });

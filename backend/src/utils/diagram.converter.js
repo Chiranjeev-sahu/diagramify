@@ -1,10 +1,5 @@
 import { parseMermaidToJSON } from "./ai.utils.js";
 
-/**
- * Converts structured diagramData (JSON) into Mermaid.js code for a Flowchart.
- * @param {object} diagramData - The structured JSON data for the flowchart.
- * @returns {string} The Mermaid.js code string.
- */
 export const convertFlowchartDataToMermaid = (diagramData) => {
   console.log("convertFlowchartDataToMermaid - START", diagramData);
 
@@ -23,7 +18,7 @@ export const convertFlowchartDataToMermaid = (diagramData) => {
     throw new Error(errorMessage);
   }
 
-  let mermaidCode = "graph TD\n"; // Default for top-down flowchart
+  let mermaidCode = "graph LR\n"; // Default for top-down flowchart
 
   // Map elements to their Mermaid.js node representations
   try {
@@ -36,22 +31,22 @@ export const convertFlowchartDataToMermaid = (diagramData) => {
       // This switch statement maps your AI's 'type' to Mermaid's syntax
       switch (element.type) {
         case "start":
-          nodeRepresentation = `${element.id}((${element.text}))`; // (()) for start/end
+          nodeRepresentation = `${element.id}(("${element.text}"))`; // (()) for start/end
           break;
         case "end":
-          nodeRepresentation = `${element.id}((${element.text}))`;
+          nodeRepresentation = `${element.id}(("${element.text}"))`;
           break;
         case "process":
-          nodeRepresentation = `${element.id}[${element.text}]`; // [] for process
+          nodeRepresentation = `${element.id}["${element.text}"]`; // [] for process
           break;
         case "decision":
-          nodeRepresentation = `${element.id}{${element.text}}`; // {} for decision
+          nodeRepresentation = `${element.id}{"${element.text}"}`; // {} for decision
           break;
         case "inputoutput":
-          nodeRepresentation = `${element.id}[/${element.text}/]`; // [//] for parallelogram
+          nodeRepresentation = `${element.id}[/"${element.text}"/]`; // [//] for parallelogram
           break;
         default:
-          nodeRepresentation = `${element.id}[${element.text}]`; // Default to rectangle
+          nodeRepresentation = `${element.id}["${element.text}"]`; // Default to rectangle
       }
       mermaidCode += `    ${nodeRepresentation};\n`;
       console.log(
@@ -93,11 +88,6 @@ export const convertFlowchartDataToMermaid = (diagramData) => {
   return mermaidCode;
 };
 
-/**
- * Converts structured diagramData (JSON) into Mermaid.js code for a Sequence Diagram.
- * @param {object} diagramData - The structured JSON data for the sequence diagram.
- * @returns {string} The Mermaid.js code string.
- */
 export const convertSequenceDiagramDataToMermaid = (diagramData) => {
   console.log("convertSequenceDiagramDataToMermaid - START", diagramData);
   if (
@@ -184,11 +174,6 @@ export const convertSequenceDiagramDataToMermaid = (diagramData) => {
   return mermaidCode;
 };
 
-/**
- * Converts structured diagramData (JSON) into Mermaid.js code for an ER Diagram.
- * @param {object} diagramData - The structured JSON data for the ER diagram.
- * @returns {string} The Mermaid.js code string.
- */
 export const convertERDiagramDataToMermaid = (diagramData) => {
   console.log("convertERDiagramDataToMermaid - START", diagramData);
 
@@ -282,11 +267,6 @@ export const convertERDiagramDataToMermaid = (diagramData) => {
   return mermaidCode;
 };
 
-/**
- * Converts structured diagramData (JSON) into Mermaid.js code for a Gantt Chart.
- * @param {object} diagramData - The structured JSON data for the Gantt chart.
- * @returns {string} The Mermaid.js code string.
- */
 export const convertGanttChartDataToMermaid = (diagramData) => {
   console.log("convertGanttChartDataToMermaid - START", diagramData);
   if (!diagramData || !Array.isArray(diagramData.sections)) {
@@ -362,12 +342,6 @@ export const convertGanttChartDataToMermaid = (diagramData) => {
   return mermaidCode;
 };
 
-/**
- * Main dispatcher function to convert diagramData to Mermaid.js code based on diagramType.
- * (Used by reprompt controller)
- * @param {object} diagramData - The structured JSON data of the diagram.
- ** @returns {string} The Mermaid.js code string.
- */
 export const diagramDataToMermaidCode = (diagramData) => {
   console.log("diagramDataToMermaidCode - START", diagramData);
   if (!diagramData || !diagramData.diagramType) {
@@ -416,13 +390,6 @@ export const diagramDataToMermaidCode = (diagramData) => {
   return mermaidCode;
 };
 
-/**
- * Converts Mermaid.js code back into structured diagramData JSON using AI.
- * (Used by the 'update code' controller)
- * @param {string} mermaidCode - The Mermaid.js code.
- * @param {string} diagramType - The type of diagram to parse as.
- * @returns {Promise<object>} The structured diagramData JSON.
- */
 export const mermaidCodeToDiagramData = async (mermaidCode, diagramType) => {
   console.log("mermaidCodeToDiagramData - START", diagramType);
   if (!diagramType) {
@@ -438,8 +405,6 @@ export const mermaidCodeToDiagramData = async (mermaidCode, diagramType) => {
       `mermaidCodeToDiagramData - ERROR: Failed to parse code for ${diagramType}:`,
       error,
     );
-    // If parsing fails, we still save the code but return a minimal
-    // data object to prevent a crash.
     return {
       diagramType: diagramType,
       error: "Failed to parse code, but code was saved.",

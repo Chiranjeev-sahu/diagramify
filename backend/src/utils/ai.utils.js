@@ -42,7 +42,9 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
       required: ["diagramType", "elements", "connections"],
       propertyOrdering: ["diagramType", "elements", "connections"],
     },
-    generationPrompt: `You are an AI assistant that generates structured JSON data for a Flowchart diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise flowchart. Only output the JSON.`,
+    generationPrompt: `You are an AI assistant that generates structured JSON data for a Flowchart diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise flowchart.
+        **IMPORTANT: Do not use 'start', 'end', 'graph', or 'subgraph' as a node 'id', as they are reserved keywords. Use an alternative like 'startNode' or 'endNode' instead.**
+        Only output the JSON.`,
     parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Flowchart.
 Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
 - 'graph TD' means Flowchart.
