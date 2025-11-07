@@ -43,18 +43,18 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
       propertyOrdering: ["diagramType", "elements", "connections"],
     },
     generationPrompt: `You are an AI assistant that generates structured JSON data for a Flowchart diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise flowchart.
-        **IMPORTANT: Do not use 'start', 'end', 'graph', or 'subgraph' as a node 'id', as they are reserved keywords. Use an alternative like 'startNode' or 'endNode' instead.**
-        Only output the JSON.`,
+                      **IMPORTANT: Do not use 'start', 'end', 'graph', or 'subgraph' as a node 'id', as they are reserved keywords. Use an alternative like 'startNode' or 'endNode' instead.**
+                      Only output the JSON.`,
     parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Flowchart.
-Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
-- 'graph TD' means Flowchart.
-- A(Text) or A[Text] maps to {"id": "A", "type": "process", "text": "Text"}.
-- A((Text)) maps to {"id": "A", "type": "start", "text": "Text"} or {"id": "A", "type": "end", "text": "Text"}.
-- A{Text} maps to {"id": "A", "type": "decision", "text": "Text"}.
-- A[/Text/] maps to {"id": "A", "type": "inputoutput", "text": "Text"}.
-- A --> B maps to {"from": "A", "to": "B"}.
-- A -- "label" --> B maps to {"from": "A", "to": "B", "label": "label"}.
-Return ONLY the valid JSON.`,
+                    Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
+                    - 'graph TD' means Flowchart.
+                    - A(Text) or A[Text] maps to {"id": "A", "type": "process", "text": "Text"}.
+                    - A((Text)) maps to {"id": "A", "type": "start", "text": "Text"} or {"id": "A", "type": "end", "text": "Text"}.
+                    - A{Text} maps to {"id": "A", "type": "decision", "text": "Text"}.
+                    - A[/Text/] maps to {"id": "A", "type": "inputoutput", "text": "Text"}.
+                    - A --> B maps to {"from": "A", "to": "B"}.
+                    - A -- "label" --> B maps to {"from": "A", "to": "B", "label": "label"}.
+                    Return ONLY the valid JSON.`,
   },
   Sequence: {
     schema: {
@@ -88,14 +88,14 @@ Return ONLY the valid JSON.`,
     },
     generationPrompt: `You are an AI assistant that generates structured JSON data for a Sequence diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise sequence diagram. Only output the JSON.`,
     parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Sequence Diagram.
-Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
-- 'participant A' maps to an item in "actors".
-- 'title X' maps to {"title": "X"}.
-- A->>B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "sync"}.
-- A->>B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "async"}.
-- A-->B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "reply"}.
-- A-->>B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "async_reply"}.
-Return ONLY the valid JSON.`,
+                    Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
+                    - 'participant A' maps to an item in "actors".
+                    - 'title X' maps to {"title": "X"}.
+                    - A->>B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "sync"}.
+                    - A->>B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "async"}.
+                    - A-->B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "reply"}.
+                    - A-->>B: msg maps to {"sender": "A", "receiver": "B", "message": "msg", "type": "async_reply"}.
+                    Return ONLY the valid JSON.`,
   },
   ER: {
     schema: {
@@ -155,15 +155,15 @@ Return ONLY the valid JSON.`,
     },
     generationPrompt: `You are an AI assistant that generates structured JSON data for an ER diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise ER diagram. Only output the JSON.`,
     parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for an ER Diagram.
-Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
-- 'ENTITY {' maps to {"name": "ENTITY", "attributes": [...]}.
-- 'string name PK' maps to {"type": "string", "name": "name", "key": "PK"}.
-- 'int id' maps to {"type": "int", "name": "id"}.
-- A ||--|| B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "one-to-one", "label": "label"}.
-- A ||--o{ B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "one-to-many", "label": "label"}.
-- A }o--|| B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "many-to-one", "label": "label"}.
-- A }o--o{ B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "many-to-many", "label": "label"}.
-Return ONLY the valid JSON.`,
+                    Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
+                    - 'ENTITY {' maps to {"name": "ENTITY", "attributes": [...]}.
+                    - 'string name PK' maps to {"type": "string", "name": "name", "key": "PK"}.
+                    - 'int id' maps to {"type": "int", "name": "id"}.
+                    - A ||--|| B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "one-to-one", "label": "label"}.
+                    - A ||--o{ B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "one-to-many", "label": "label"}.
+                    - A }o--|| B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "many-to-one", "label": "label"}.
+                    - A }o--o{ B : "label" maps to {"fromEntity": "A", "toEntity": "B", "relationshipType": "many-to-many", "label": "label"}.
+                    Return ONLY the valid JSON.`,
   },
   Gantt: {
     schema: {
@@ -215,13 +215,13 @@ Return ONLY the valid JSON.`,
     },
     generationPrompt: `You are an AI assistant that generates structured JSON data for a Gantt chart based on a user's natural language request. Ensure the output is valid JSON according to the schema. Dates must be in YYYY-MM-DD format. Provide a clear and concise Gantt chart. Only output the JSON.`,
     parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Gantt Chart.
-Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
-- 'title X' maps to {"title": "X"}.
-- 'dateFormat YYYY-MM-DD' maps to {"dateFormat": "YYYY-MM-DD"}.
-- 'section Name' maps to {"name": "Name", "tasks": [...]}.
-- 'Task Name :done, 2024-01-01, 2024-01-02' maps to {"name": "Task Name", "status": "done", "start": "2024-01-01", "end": "2024-01-02"}.
-- 'Task Name : 2024-01-01, 2024-01-02' maps to {"name": "Task Name", "start": "2024-01-01", "end": "2024-01-02"}.
-Return ONLY the valid JSON.`,
+                    Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
+                    - 'title X' maps to {"title": "X"}.
+                    - 'dateFormat YYYY-MM-DD' maps to {"dateFormat": "YYYY-MM-DD"}.
+                    - 'section Name' maps to {"name": "Name", "tasks": [...]}.
+                    - 'Task Name :done, 2024-01-01, 2024-01-02' maps to {"name": "Task Name", "status": "done", "start": "2024-01-01", "end": "2024-01-02"}.
+                    - 'Task Name : 2024-01-01, 2024-01-02' maps to {"name": "Task Name", "start": "2024-01-01", "end": "2024-01-02"}.
+                    Return ONLY the valid JSON.`,
   },
 };
 
@@ -269,8 +269,9 @@ Return ONLY a JSON object matching the schema.`;
         responseSchema: schema,
       },
     });
-    // ... (rest of the function is unchanged)
+    
     const response = result.response;
+    console.log(JSON.stringify(response, null, 2));
     if (
       !response.candidates ||
       !response.candidates[0].content ||
@@ -436,25 +437,22 @@ export const parseMermaidToJSON = async (mermaidCode, diagramType) => {
 };
 
 // --- REPROMPT/MANIPULATION FUNCTIONS (Unchanged) ---
-export const interpretPromptToInstruction = async (
-  naturalLanguagePrompt,
-  currentDiagramData,
-) => {
+export const interpretPromptToInstruction = async (naturalLanguagePrompt,currentDiagramData,) => {
   console.log("interpretPromptToInstruction - START");
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const systemPrompt = `You are an AI assistant designed to convert a user's natural language request for diagram modification into a structured JSON instruction.
-The current diagram data is provided to help resolve references (e.g., node names to IDs).
-Output only a JSON object following these rules:
-- If changing text: {"action": "update_element", "element_id": "resolved_id", "updates": {"text": "new_text"}}
-- If adding an element: {"action": "add_element", "new_element": {"type": "type", "text": "text"}, "connections": [{"from": "existing_id", "to": "new_id", "label": "label?"}]}
-- If removing an element: {"action": "remove_element", "element_id": "resolved_id"}
-- Be precise. If an element cannot be resolved from currentDiagramData, throw an error.
-Current Diagram Data:
-\`\`\`json
-${JSON.stringify(currentDiagramData, null, 2)}
-\`\`\`
-Return ONLY the JSON instruction.`;
+                          The current diagram data is provided to help resolve references (e.g., node names to IDs).
+                          Output only a JSON object following these rules:
+                          - If changing text: {"action": "update_element", "element_id": "resolved_id", "updates": {"text": "new_text"}}
+                          - If adding an element: {"action": "add_element", "new_element": {"type": "type", "text": "text"}, "connections": [{"from": "existing_id", "to": "new_id", "label": "label?"}]}
+                          - If removing an element: {"action": "remove_element", "element_id": "resolved_id"}
+                          - Be precise. If an element cannot be resolved from currentDiagramData, throw an error.
+                          Current Diagram Data:
+                          \`\`\`json
+                          ${JSON.stringify(currentDiagramData, null, 2)}
+                          \`\`\`
+                          Return ONLY the JSON instruction.`;
 
     const userPrompt = `User's Request: "${naturalLanguagePrompt}"`;
     const result = await model.generateContent({
@@ -513,11 +511,10 @@ Return ONLY the JSON instruction.`;
         },
       },
     });
-    // ... (rest of the function is unchanged)
     const response = result.response;
     if (
       !response.candidates ||
-      !response.candidates.length === 0 ||
+      response.candidates.length === 0 ||
       !response.candidates[0].content ||
       !response.candidates[0].content.parts
     ) {
@@ -545,22 +542,22 @@ export const manipulateDiagramData = async (
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Using 1.5-flash
     const systemPrompt = `You are an AI assistant designed to strictly modify diagram data (JSON) based on a structured JSON instruction.
-Do not interpret natural language. Apply the changes precisely to the current_diagram_data.
-Output only the modified diagram data JSON. Ensure the output is valid JSON.
-Schema for diagramData elements (e.g., Flowchart):
-- "elements": [{"id": "string", "type": "start|end|process|decision|...", "text": "string"}]
-- "connections": [{"from": "string", "to": "string", "label": "string?"}]
-- Element IDs must be unique. If adding, generate a new unique ID (e.g., 'el_123').
-Return ONLY the modified Diagram Data JSON.`;
+                          Do not interpret natural language. Apply the changes precisely to the current_diagram_data.
+                          Output only the modified diagram data JSON. Ensure the output is valid JSON.
+                          Schema for diagramData elements (e.g., Flowchart):
+                          - "elements": [{"id": "string", "type": "start|end|process|decision|...", "text": "string"}]
+                          - "connections": [{"from": "string", "to": "string", "label": "string?"}]
+                          - Element IDs must be unique. If adding, generate a new unique ID (e.g., 'el_123').
+                          Return ONLY the modified Diagram Data JSON.`;
 
     const userPrompt = `Current Diagram Data:
-\`\`\`json
-${JSON.stringify(currentDiagramData, null, 2)}
-\`\`\`
-Structured Instruction:
-\`\`\`json
-${JSON.stringify(structuredInstruction, null, 2)}
-\`\`\``;
+                        \`\`\`json
+                        ${JSON.stringify(currentDiagramData, null, 2)}
+                        \`\`\`
+                        Structured Instruction:
+                        \`\`\`json
+                        ${JSON.stringify(structuredInstruction, null, 2)}
+                        \`\`\``;
 
     const diagramType = currentDiagramData.diagramType;
 
@@ -591,11 +588,11 @@ ${JSON.stringify(structuredInstruction, null, 2)}
         responseSchema: selectedSchema,
       },
     });
-    // ... (rest of the function is unchanged)
+    
     const response = result.response;
     if (
       !response.candidates ||
-      !response.candidates.length === 0 ||
+      response.candidates.length === 0 ||
       !response.candidates[0].content ||
       !response.candidates[0].content.parts
     ) {

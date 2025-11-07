@@ -188,6 +188,152 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
   );
 });
 
+//for free trial diagram generation
+export const generateDiagramsPublic = asyncHandler(async (req, res) => {
+  console.log("generateDiagramsPublic - START");
+  const { prompt } = req.body;
+  if (!prompt) {
+    console.warn("generateDiagrams - ERROR: Prompt text required");
+    throw new APIError(400, "Prompt text required");
+  }
+
+  const escapedPrompt = prompt
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
+  if (!escapedPrompt) {
+    console.warn("generateDiagrams - ERROR: Prompt text required");
+    throw new APIError(400, "Prompt text required");
+  }
+
+  let relevantTypes;
+  try {
+    relevantTypes = await classifyPromptDiagramTypes(escapedPrompt);
+  } catch (error) {
+    console.error(
+      "generateDiagrams - ERROR: Failed to classify prompt:",
+      error,
+    );
+    throw new APIError(500, "Failed to analyze prompt with AI.");
+  }
+
+  if (!relevantTypes || relevantTypes.length === 0) {
+    console.warn("generateDiagrams - No relevant diagram types found.");
+    return res.json(
+      new APIResponse(
+        200,
+        [],
+        "Prompt analyzed, but no relevant diagram types were found.",
+      ),
+    );
+  }
+
+  const generationPromises = relevantTypes.map((type) =>
+    generateDiagramData(escapedPrompt, type),
+  );
+
+  console.log(
+    "generateDiagrams - Calling generateDiagramData for relevant types...",
+  );
+
+  const results = await Promise.allSettled(generationPromises);
+
+  const generatedDiagramData = [];
+  results.forEach((result, index) => {
+    if (result.status === "fulfilled") {
+      generatedDiagramData.push(result.value);
+    } else {
+      console.error(
+        `generateDiagrams - ERROR: Failed to generate ${relevantTypes[index]}:`,
+        result.reason.message,
+      );
+    }
+  });
+
+  if (generatedDiagramData.length === 0) {
+    console.error(
+      "generateDiagrams - All relevant diagram generations failed.",
+    );
+    throw new APIError(500, "AI failed to generate any of the diagrams.");
+  }
+
+  console.log(
+    "generateDiagrams - Successfully generated data:",
+    generatedDiagramData,
+  );
+  const diagramCodes = await Promise.all(
+    generatedDiagramData.map(async (diagramData) => {
+      if (!diagramData) {
+        console.warn("generateDiagrams - Skipping null diagram data.");
+        return null;
+      }
+
+      let diagramCode = "";
+      try {
+        switch (diagramData.diagramType) {
+          case "Flowchart":
+            diagramCode = convertFlowchartDataToMermaid(diagramData);
+            break;
+          case "Sequence":
+            diagramCode = convertSequenceDiagramDataToMermaid(diagramData);
+            break;
+          case "ER":
+            diagramCode = convertERDiagramDataToMermaid(diagramData);
+            break;
+          case "Gantt":
+            diagramCode = convertGanttChartDataToMermaid(diagramData);
+            break;
+          default:
+            console.warn(
+              `generateDiagrams - WARNING: Unsupported diagram type: ${diagramData.diagramType}`,
+            );
+            return null;
+        }
+      } catch (error) {
+        console.error(
+          "generateDiagrams - ERROR: Failed to convert diagram data:",
+          error,
+        );
+        return null;
+      }
+
+      if (!diagramCode) {
+        console.warn(
+          "generateDiagrams - Skipping save due to empty diagramCode",
+        );
+        return null;
+      }
+      return diagramCode;
+    }),
+  );
+
+  const createdDiagrams = diagramCodes.filter(Boolean);
+
+  if (createdDiagrams.length === 0) {
+    console.warn(
+      "generateDiagrams - No diagrams were successfully created and saved.",
+    );
+    return res
+      .status(200)
+      .json(
+        new APIResponse(
+          200,
+          [],
+          "The AI could not generate a diagram from the provided prompt. Please try a different prompt or diagram type.",
+        ),
+      );
+  }
+
+  console.log("generateDiagrams - END");
+  return res
+    .status(200)
+    .json(
+      new APIResponse(200, createdDiagrams, "Diagrams generated successfully"),
+    );
+});
+
 export const repromptDiagram = asyncHandler(async (req, res) => {
   const { newPrompt } = req.body;
   const parentDiagramId = req.params.id;

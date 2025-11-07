@@ -2,3 +2,5 @@ node_modules/
 .env
 dist/
 build/
+.continue/rules/new-rule-1.md
+.continue/rules/new-rule.md
