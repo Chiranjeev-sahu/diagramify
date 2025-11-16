@@ -5,16 +5,18 @@ import corsOptions from "./src/config/cors.config.js";
 import { errorMiddleware } from "./src/middleware/error.middleware.js";
 import diagramRouter from "./src/routes/diagram.routes.js";
 import userRouter from "./src/routes/user.routes.js";
+import { generateDiagramsPublic } from "./src/controllers/diagram.controller.js";
 
 const app = express();
-
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
 app.use(cors(corsOptions));
+
 app.use(cookieParser());
 
+app.post("/api", generateDiagramsPublic);
 app.use("/api/v1", userRouter);
-app.use("/api/diagrams", diagramRouter);
+app.use("/api/v1/diagrams", diagramRouter);
 
 app.use(errorMiddleware);
 export { app };

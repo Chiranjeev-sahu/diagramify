@@ -1,6 +1,6 @@
 import { app } from "./app.js";
 import connectDB from "./src/config/connectDB.js";
-// IFFE
+// IIFE
 (async () => {
   try {
     await connectDB();

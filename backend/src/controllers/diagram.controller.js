@@ -45,7 +45,7 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error(
       "generateDiagrams - ERROR: Failed to classify prompt:",
-      error,
+      error
     );
     throw new APIError(500, "Failed to analyze prompt with AI.");
   }
@@ -56,17 +56,17 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
       new APIResponse(
         200,
         [],
-        "Prompt analyzed, but no relevant diagram types were found.",
-      ),
+        "Prompt analyzed, but no relevant diagram types were found."
+      )
     );
   }
 
   const generationPromises = relevantTypes.map((type) =>
-    generateDiagramData(escapedPrompt, type),
+    generateDiagramData(escapedPrompt, type)
   );
 
   console.log(
-    "generateDiagrams - Calling generateDiagramData for relevant types...",
+    "generateDiagrams - Calling generateDiagramData for relevant types..."
   );
 
   const results = await Promise.allSettled(generationPromises);
@@ -78,21 +78,21 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
     } else {
       console.error(
         `generateDiagrams - ERROR: Failed to generate ${relevantTypes[index]}:`,
-        result.reason.message,
+        result.reason.message
       );
     }
   });
 
   if (generatedDiagramData.length === 0) {
     console.error(
-      "generateDiagrams - All relevant diagram generations failed.",
+      "generateDiagrams - All relevant diagram generations failed."
     );
     throw new APIError(500, "AI failed to generate any of the diagrams.");
   }
 
   console.log(
     "generateDiagrams - Successfully generated data:",
-    generatedDiagramData,
+    generatedDiagramData
   );
 
   const saveDiagrams = generatedDiagramData.map(async (diagramData) => {
@@ -118,14 +118,14 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
           break;
         default:
           console.warn(
-            `generateDiagrams - WARNING: Unsupported diagram type: ${diagramData.diagramType}`,
+            `generateDiagrams - WARNING: Unsupported diagram type: ${diagramData.diagramType}`
           );
           return null;
       }
     } catch (error) {
       console.error(
         "generateDiagrams - ERROR: Failed to convert diagram data:",
-        error,
+        error
       );
       return null;
     }
@@ -168,29 +168,51 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
       });
       console.log(
         "generateDiagrams - Updated user's generated diagrams:",
-        diagramIds,
+        diagramIds
       );
     } catch (error) {
       console.error(
         "generateDiagrams - ERROR: Failed to update user's diagramsGenerated:",
-        error,
+        error
       );
     }
   } else {
     console.warn(
-      "generateDiagrams - No diagrams were successfully created and saved.",
+      "generateDiagrams - No diagrams were successfully created and saved."
     );
   }
 
   console.log("generateDiagrams - END - Returning response");
   return res.json(
-    new APIResponse(201, createdDiagrams, "Generation Successful"),
+    new APIResponse(201, createdDiagrams, "Generation Successful")
   );
 });
 
 //for free trial diagram generation
+const freeTrialUsage = {};
 export const generateDiagramsPublic = asyncHandler(async (req, res) => {
   console.log("generateDiagramsPublic - START");
+  const ipAddress = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress;
+  if (!ipAddress) {
+    console.warn(
+      "generateDiagramsPublic - ERROR: Could not determine IP address"
+    );
+    return res.status(500)
+              .json(new APIResponse(500, {}, "Could not determine IP address"));
+  }
+
+  if (freeTrialUsage[ipAddress] && freeTrialUsage[ipAddress] >= 3) {
+    console.warn(
+      `generateDiagramsPublic - ERROR: IP ${ipAddress} exceeded free trial limit`
+    );
+    return res
+      .status(429)
+      .json(new APIResponse(429, {}, "Free trial limit exceeded")); // 429 Too Many Requests
+  }
+
+  freeTrialUsage[ipAddress] = (freeTrialUsage[ipAddress] || 0) + 1;
+
+
   const { prompt } = req.body;
   if (!prompt) {
     console.warn("generateDiagrams - ERROR: Prompt text required");
@@ -214,7 +236,7 @@ export const generateDiagramsPublic = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error(
       "generateDiagrams - ERROR: Failed to classify prompt:",
-      error,
+      error
     );
     throw new APIError(500, "Failed to analyze prompt with AI.");
   }
@@ -225,17 +247,17 @@ export const generateDiagramsPublic = asyncHandler(async (req, res) => {
       new APIResponse(
         200,
         [],
-        "Prompt analyzed, but no relevant diagram types were found.",
-      ),
+        "Prompt analyzed, but no relevant diagram types were found."
+      )
     );
   }
 
   const generationPromises = relevantTypes.map((type) =>
-    generateDiagramData(escapedPrompt, type),
+    generateDiagramData(escapedPrompt, type)
   );
 
   console.log(
-    "generateDiagrams - Calling generateDiagramData for relevant types...",
+    "generateDiagrams - Calling generateDiagramData for relevant types..."
   );
 
   const results = await Promise.allSettled(generationPromises);
@@ -247,21 +269,21 @@ export const generateDiagramsPublic = asyncHandler(async (req, res) => {
     } else {
       console.error(
         `generateDiagrams - ERROR: Failed to generate ${relevantTypes[index]}:`,
-        result.reason.message,
+        result.reason.message
       );
     }
   });
 
   if (generatedDiagramData.length === 0) {
     console.error(
-      "generateDiagrams - All relevant diagram generations failed.",
+      "generateDiagrams - All relevant diagram generations failed."
     );
     throw new APIError(500, "AI failed to generate any of the diagrams.");
   }
 
   console.log(
     "generateDiagrams - Successfully generated data:",
-    generatedDiagramData,
+    generatedDiagramData
   );
   const diagramCodes = await Promise.all(
     generatedDiagramData.map(async (diagramData) => {
@@ -287,33 +309,33 @@ export const generateDiagramsPublic = asyncHandler(async (req, res) => {
             break;
           default:
             console.warn(
-              `generateDiagrams - WARNING: Unsupported diagram type: ${diagramData.diagramType}`,
+              `generateDiagrams - WARNING: Unsupported diagram type: ${diagramData.diagramType}`
             );
             return null;
         }
       } catch (error) {
         console.error(
           "generateDiagrams - ERROR: Failed to convert diagram data:",
-          error,
+          error
         );
         return null;
       }
 
       if (!diagramCode) {
         console.warn(
-          "generateDiagrams - Skipping save due to empty diagramCode",
+          "generateDiagrams - Skipping save due to empty diagramCode"
         );
         return null;
       }
       return diagramCode;
-    }),
+    })
   );
 
   const createdDiagrams = diagramCodes.filter(Boolean);
 
   if (createdDiagrams.length === 0) {
     console.warn(
-      "generateDiagrams - No diagrams were successfully created and saved.",
+      "generateDiagrams - No diagrams were successfully created and saved."
     );
     return res
       .status(200)
@@ -321,8 +343,8 @@ export const generateDiagramsPublic = asyncHandler(async (req, res) => {
         new APIResponse(
           200,
           [],
-          "The AI could not generate a diagram from the provided prompt. Please try a different prompt or diagram type.",
-        ),
+          "The AI could not generate a diagram from the provided prompt. Please try a different prompt or diagram type."
+        )
       );
   }
 
@@ -330,7 +352,7 @@ export const generateDiagramsPublic = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new APIResponse(200, createdDiagrams, "Diagrams generated successfully"),
+      new APIResponse(200, createdDiagrams, "Diagrams generated successfully")
     );
 });
 
@@ -362,12 +384,12 @@ export const repromptDiagram = asyncHandler(async (req, res) => {
 
   const structured_instruction = await interpretPromptToInstruction(
     escapedNewPrompt,
-    current_diagramData,
+    current_diagramData
   );
 
   const new_diagramData = await manipulateDiagramData(
     current_diagramData,
-    structured_instruction,
+    structured_instruction
   );
 
   const new_diagramCode = diagramDataToMermaidCode(new_diagramData);
@@ -390,7 +412,7 @@ export const repromptDiagram = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new APIResponse(200, newDiagramVersion, "Diagram updated successfully"),
+      new APIResponse(200, newDiagramVersion, "Diagram updated successfully")
     );
 });
 
@@ -419,7 +441,7 @@ export const saveDiagram = asyncHandler(async (req, res) => {
         title: title,
       },
     },
-    { new: true },
+    { new: true }
   );
 
   return res
@@ -447,7 +469,7 @@ export const updateDiagramCode = asyncHandler(async (req, res) => {
 
   const new_diagramData = await mermaidCodeToDiagramData(
     newDiagramCode,
-    diagramToUpdate.diagramType,
+    diagramToUpdate.diagramType
   );
 
   const updatedDiagram = await Diagram.findByIdAndUpdate(
@@ -458,7 +480,7 @@ export const updateDiagramCode = asyncHandler(async (req, res) => {
         diagramData: new_diagramData,
       },
     },
-    { new: true },
+    { new: true }
   );
 
   return res
