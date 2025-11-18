@@ -1,15 +1,5 @@
-import 
-function App() {
+import LandingPage from "@/pages/LandingPage";
 
-  return (
-    <div className="App">
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/app/dashboard" element={<DashboardPage />} />
-      </Routes>
-    </div>
-  )
+export default function App() {
+  return <LandingPage />;
 }
-
-export default App

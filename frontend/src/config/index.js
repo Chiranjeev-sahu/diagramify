@@ -1,3 +1,3 @@
-export const API_BASE_URL = import.meta.API_BASE_URL;
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
 export const APP_NAME = "Diagramify";
 export const DEFAULT_TIMEOUT = 100000;
