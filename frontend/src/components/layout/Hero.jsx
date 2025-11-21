@@ -33,30 +33,9 @@ export function Hero() {
   };
 
   return (
-    // <>
-    //   <div className="bg-white w-[95%] flex flex-col items-center justify-center border-x border-gray-300 border-b-0 gap-16 p-7">
-    //     <h1 className="font-bold text-zinc-950">SOME CATCHY SHIT HERE</h1>
-    //     <p>This is the Hero section with the input ↓ </p>
-    //     <input
-    //       type="text"
-    //       className="h-12 w-auto border rounded-4xl"
-    //       value={code}
-    //       onChange={(e) => setCode(e.target.value)}
-    //     />
-    //     <button className="px-4 py-2 bg-black text-white rounded" onClick={fetchCode}>
-    //       Generate Free Diagram
-    //     </button>
-    //     {/* <div
-    //       ref={containerRef}
-    //       className="font-extralight h-60 w-auto flex justify-center items-center outline"
-    //     >
-    //       I Will contain diagram that are generated
-    //     </div> */}
-    //   </div>
-    // </>
     <section className="w-[95%] border-x border-gray-300 bg-white py-16 sm:py-20 lg:py-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center text-center space-y-8">
+        <div className="flex flex-col items-center text-center space-y-24">
           {/* Heading */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-zinc-950">
             Generate Diagrams with AI

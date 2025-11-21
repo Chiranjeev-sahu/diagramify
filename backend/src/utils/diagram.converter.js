@@ -82,7 +82,7 @@ export const convertFlowchartDataToMermaid = (diagramData) => {
   }
 
   console.log(
-    "convertFlowchartDataToMermaid - END - Mermaid code:",
+    "convertFlowchartDataToMermaid - END \nMermaid code:\n",
     mermaidCode,
   );
   return mermaidCode;
