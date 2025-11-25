@@ -11,21 +11,24 @@ export default function DiagramPreview({ code }) {
   }, []);
 
   useEffect(() => {
+
     const el = containerRef.current;
-    if (!el) return; 
+    if (!el) return;
     let mounted = true;
+
     (async () => {
-      await renderInto(el,code);
+      await renderInto(el, code);
 
       if (!mounted) return;
     })();
+
     return () => {
       mounted = false;
     };
   }, [code]);
 
-  return <div ref={containerRef} className= {cn(
-    'border-t border-l border-neutral-100 bg-[#edf4ff]', 
+  return <div ref={containerRef} className={cn(
+    'border-t border-l border-neutral-100 bg-[#edf4ff]',
     'shadow-[7px_7px_0px_0px_black]',
   )} />;
 }

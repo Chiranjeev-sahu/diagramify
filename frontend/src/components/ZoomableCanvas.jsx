@@ -8,12 +8,16 @@ export default function ZoomableCanvas({ children }) {
 
       <TransformWrapper
         initialScale={1}
-        minScale={0.5}
+        minScale={0.3}
         maxScale={4}
         centerOnInit={true}
+        centerZoomedOut={true}
         wheel={{ step: 0.1 }}
+        limitToBounds={false}
+        panning={{ disabled: false }}
+        doubleClick={{ disabled: false }}
       >
-        {({ zoomIn, zoomOut, resetTransform }) => (
+        {({ zoomIn, zoomOut, resetTransform, centerView }) => (
           <>
             {/* --- TOOLBAR --- */}
             <div className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-white p-1.5 rounded-lg shadow-sm border border-slate-200">
@@ -28,7 +32,10 @@ export default function ZoomableCanvas({ children }) {
                   <ZoomOut size={18} />
                 </button>
                 <button
-                  onClick={() => resetTransform()}
+                  onClick={() => {
+                    resetTransform();
+                    centerView();
+                  }}
                   className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
                   title="Reset View"
                 >
@@ -61,13 +68,13 @@ export default function ZoomableCanvas({ children }) {
             </div>
 
             {/* --- CANVAS AREA --- */}
-            <div className="flex-1 w-full h-full cursor-grab active:cursor-grabbing">
+            <div className="flex-1 w-full h-full">
               <TransformComponent
-                wrapperClass="w-full h-full"
+                wrapperClass="!w-full !h-full"
                 contentClass="w-full h-full flex items-center justify-center"
               >
                 {/* This is where the Diagram will be rendered */}
-                <div className="min-w-[500px] min-h-[500px] bg-white rounded-xl shadow-sm border border-slate-100 p-8">
+                <div className="min-w-[500px] min-h-[500px] bg-white rounded-xl shadow-sm border border-slate-100 p-8 cursor-grab active:cursor-grabbing">
                   {children}
                 </div>
               </TransformComponent>

@@ -94,13 +94,13 @@ export default function DashboardLayout() {
 
           <PanelResizeHandle className="w-1 bg-slate-200 hover:bg-purple-100 transition-colors" />
           {/* RIGHT SIDE: The "Container" for the next split */}
-          <Panel defaultSize={40}>
+          <Panel defaultSize={50}>
 
             {/* 2. Inner Split (Vertical) */}
             <PanelGroup direction="vertical">
 
               {/* TOP: Code */}
-              <Panel defaultSize={49}>
+              <Panel defaultSize={50}>
                 {/* <CodeEditor /> */}
                 <div>I will be the code editor</div>
               </Panel>
@@ -108,7 +108,7 @@ export default function DashboardLayout() {
               <PanelResizeHandle className="h-1 bg-slate-200 hover:bg-purple-500 transition-colors z-50" />
 
               {/* BOTTOM: AI Chat */}
-              <Panel defaultSize={49}>
+              <Panel defaultSize={50}>
                 {/* <AIChat /> */}
                 <div>I will be the AI Chat</div>
               </Panel>

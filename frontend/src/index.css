@@ -10,12 +10,10 @@
   0% {
     transform: translateZ(0) rotate(0);
   }
-  15%,
-  35% {
+  15%,35% {
     transform: translateZ(0) rotate(90deg);
   }
-  65%,
-  85% {
+  65%,85% {
     transform: translateZ(0) rotate(270deg);
   }
   100% {
@@ -35,6 +33,35 @@
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @theme inline{
   --animate-shine-pulse: shine-pulse 6s linear infinite;
+  --animate-fade-in: fade-in 0.5s ease-in-out;
+}
+.code-editor-scroll::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.code-editor-scroll::-webkit-scrollbar-track {
+  background: #1e293b; 
+}
+
+.code-editor-scroll::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 6px;
+}
+
+.code-editor-scroll::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
