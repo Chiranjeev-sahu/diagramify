@@ -10,14 +10,20 @@ export function Navbar() {
             className="flex items-center justify-between h-16"
             aria-label="Main navigation"
           >
-            {/* Logo */}
             <div className="flex items-center">
               <span className="bg-blue-200 rounded-full text-neutral-800 text-sm font-medium px-4 py-2">
                 LOGO
               </span>
             </div>
 
-            {/* CTA Button */}
+            <button
+              className={cn(
+                "bg-zinc-800 text-white",
+                "px-6 py-2.5 rounded-xl",
+                "hover:bg-zinc-700 transition-colors",
+                "text-sm font-medium"
+              )}
+              {/* CTA Button */}
             <ShimmerButton
               shimmerColor="#ffffff"
               shimmerSize="0.05em"

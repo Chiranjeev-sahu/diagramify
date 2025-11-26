@@ -41,13 +41,13 @@ export default forwardRef(function ShimmerButton(
       <div
         className="absolute inset-0 overflow-visible -z-30 blur-[2px] @container-[size]"
       >
-        <div 
+        <div
           className="absolute inset-0 aspect-square h-[100cqh] rounded-none"
           style={{
             animation: `shimmerSlide var(--speed) ease-in-out infinite alternate`,
           }}
         >
-          <div 
+          <div
             className="absolute -inset-full w-auto rotate-0"
             style={{
               background: `conic-gradient(from calc(270deg - (var(--spread) * 0.5)), transparent 0, var(--shimmer-color) var(--spread), transparent var(--spread))`,
@@ -64,7 +64,7 @@ export default forwardRef(function ShimmerButton(
         className={cn(
           "absolute inset-0 size-full rounded-2xl px-4 py-1.5 text-sm font-medium",
           "transform-gpu transition-all duration-300 ease-in-out",
-          
+
           "shadow-[inset_0_-8px_10px_#ffffff1f]",
           "group-hover:shadow-[inset_0_-6px_10px_#ffffff3f]",
           "group-active:shadow-[inset_0_-10px_10px_#ffffff3f]"
