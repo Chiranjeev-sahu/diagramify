@@ -12,6 +12,11 @@ const diagramSchema = new Schema(
       required: true,
       trim: true,
     },
+    title:{
+      type:String,
+      default:"Untitled Diagram",
+      trim:true
+    },
     parentDiagramId: {
       type: Schema.Types.ObjectId,
       ref: "Diagram",

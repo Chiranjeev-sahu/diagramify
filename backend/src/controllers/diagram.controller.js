@@ -144,6 +144,7 @@ export const generateDiagrams = asyncHandler(async (req, res) => {
         diagramType: diagramData.diagramType,
         diagramData: diagramData,
         diagramCode: diagramCode,
+        title:diagramData.title,
         isSaved: false,
         version: 1,
       });
@@ -401,6 +402,7 @@ export const repromptDiagram = asyncHandler(async (req, res) => {
     diagramType: parentDiagram.diagramType,
     diagramData: new_diagramData,
     diagramCode: new_diagramCode,
+    title: new_diagramData.title || parentDiagram.title,    
     isSaved: parentDiagram.isSaved,
     version: current_version + 1,
   });

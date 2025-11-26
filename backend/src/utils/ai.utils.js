@@ -11,6 +11,7 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
       type: "object",
       properties: {
         diagramType: { type: "string", enum: ["Flowchart"] },
+        title: { type: "string", description: "A short, descriptive title for the diagram" },
         elements: {
           type: "array",
           items: {
@@ -39,10 +40,10 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
           },
         },
       },
-      required: ["diagramType", "elements", "connections"],
-      propertyOrdering: ["diagramType", "elements", "connections"],
+      required: ["diagramType", "title", "elements", "connections"],
+      propertyOrdering: ["diagramType", "title", "elements", "connections"],
     },
-    generationPrompt: `You are an AI assistant that generates structured JSON data for a Flowchart diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise flowchart.
+    generationPrompt: `You are an AI assistant that generates structured JSON data for a Flowchart diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise flowchart with a descriptive title.
                       **IMPORTANT: Do not use 'start', 'end', 'graph', or 'subgraph' as a node 'id', as they are reserved keywords. Use an alternative like 'startNode' or 'endNode' instead.**
                       Only output the JSON.`,
     parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Flowchart.
@@ -61,7 +62,7 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
       type: "object",
       properties: {
         diagramType: { type: "string", enum: ["Sequence"] },
-        title: { type: "string", nullable: true },
+        title: { type: "string", description: "A short, descriptive title for the diagram" },
         actors: {
           type: "array",
           items: { type: "string" },
@@ -83,10 +84,10 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
           },
         },
       },
-      required: ["diagramType", "actors", "messages"],
+      required: ["diagramType", "title", "actors", "messages"],
       propertyOrdering: ["diagramType", "title", "actors", "messages"],
     },
-    generationPrompt: `You are an AI assistant that generates structured JSON data for a Sequence diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise sequence diagram. Only output the JSON.`,
+    generationPrompt: `You are an AI assistant that generates structured JSON data for a Sequence diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise sequence diagram with a descriptive title. Only output the JSON.`,
     parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Sequence Diagram.
                     Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
                     - 'participant A' maps to an item in "actors".
@@ -102,6 +103,7 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
       type: "object",
       properties: {
         diagramType: { type: "string", enum: ["ER"] },
+        title: { type: "string", description: "A short, descriptive title for the diagram" },
         entities: {
           type: "array",
           items: {
@@ -150,10 +152,10 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
           },
         },
       },
-      required: ["diagramType", "entities", "relationships"],
-      propertyOrdering: ["diagramType", "entities", "relationships"],
+      required: ["diagramType", "title", "entities", "relationships"],
+      propertyOrdering: ["diagramType", "title", "entities", "relationships"],
     },
-    generationPrompt: `You are an AI assistant that generates structured JSON data for an ER diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise ER diagram. Only output the JSON.`,
+    generationPrompt: `You are an AI assistant that generates structured JSON data for an ER diagram based on a user's natural language request. Ensure the output is valid JSON according to the schema. Provide a clear and concise ER diagram with a descriptive title. Only output the JSON.`,
     parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for an ER Diagram.
                     Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
                     - 'ENTITY {' maps to {"name": "ENTITY", "attributes": [...]}.
@@ -170,7 +172,7 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
       type: "object",
       properties: {
         diagramType: { type: "string", enum: ["Gantt"] },
-        title: { type: "string" },
+        title: { type: "string", description: "A short, descriptive title for the diagram" },
         dateFormat: {
           type: "string",
           description: "Date format string, e.g., 'YYYY-MM-DD'",
@@ -213,7 +215,7 @@ const DIAGRAM_SCHEMAS_AND_PROMPTS = {
       required: ["diagramType", "title", "dateFormat", "sections"],
       propertyOrdering: ["diagramType", "title", "dateFormat", "sections"],
     },
-    generationPrompt: `You are an AI assistant that generates structured JSON data for a Gantt chart based on a user's natural language request. Ensure the output is valid JSON according to the schema. Dates must be in YYYY-MM-DD format. Provide a clear and concise Gantt chart. Only output the JSON.`,
+    generationPrompt: `You are an AI assistant that generates structured JSON data for a Gantt chart based on a user's natural language request. Ensure the output is valid JSON according to the schema. Dates must be in YYYY-MM-DD format. Provide a clear and concise Gantt chart with a descriptive title. Only output the JSON.`,
     parsingPrompt: `You are an expert Mermaid.js parser. You will be given Mermaid code for a Gantt Chart.
                     Your ONLY job is to parse the code and return a JSON object that strictly adheres to the provided schema.
                     - 'title X' maps to {"title": "X"}.
