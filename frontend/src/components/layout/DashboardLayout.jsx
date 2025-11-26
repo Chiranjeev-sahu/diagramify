@@ -3,7 +3,7 @@ import { Menu, X, Home, Settings, LogOut, Plus, MessageSquare } from 'lucide-rea
 import { cn } from '@/utils/cn';
 import { Outlet } from 'react-router-dom';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import ZoomableCanvas from '../ZoomableCanvas';
+import ZoomableCanvas from '../features/diagram/ZoomableCanvas';
 // export default function DashboardLayout({ children }) {
 export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
