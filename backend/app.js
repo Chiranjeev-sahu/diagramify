@@ -17,6 +17,18 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 
 app.post("/api", generateDiagramsPublic);
+
+// Development endpoint to reset IP rate limits
+if (process.env.NODE_ENV !== 'production') {
+  app.post("/api/reset-ip-limit", (req, res) => {
+    const ipAddress = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress;
+    res.json({ 
+      message: "To reset IP limits, restart the backend server",
+      yourIP: ipAddress 
+    });
+  });
+}
+
 app.use("/api/v1", userRouter);
 app.use("/api/v1/diagrams", diagramRouter);
 app.use("/api/v1/chats", chatRouter);
