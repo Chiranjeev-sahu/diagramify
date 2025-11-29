@@ -106,4 +106,19 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, {}, "User logged Out"));
 });
 
-export { loginUser, logoutUser, registerUser };
+const getCurrentUser = asyncHandler(async (req, res) => {
+  const userResponse = {
+    _id: req.user._id,
+    username: req.user.username,
+    email: req.user.email,
+    diagramsGenerated: req.user.diagramsGenerated.length || 0,
+    createdAt: req.user.createdAt,
+    updatedAt: req.user.updatedAt,
+  };
+
+  return res
+    .status(200)
+    .json(new APIResponse(200, userResponse, "User retrieved successfully"));
+});
+
+export { loginUser, logoutUser, registerUser, getCurrentUser };
