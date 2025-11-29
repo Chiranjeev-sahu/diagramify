@@ -1,7 +1,7 @@
 const corsOptions = {
   origin: ["http://localhost:5173"],
   credentials: true,
-  methods: ["GET", "POST", "PATCH", "DELET", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 
   allowedHeaders: ["Content-Type", "Authorization", "Accept", "Origin"],
 };
