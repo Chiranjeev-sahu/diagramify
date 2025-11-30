@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Font Families */
+.font-instrument-serif {
+  font-family: 'Instrument Serif', serif;
+}
+
 @keyframes shimmerSlide {
   to {
     transform: translate(calc(100cqw - 100%), 0);
@@ -44,10 +49,46 @@
   }
 }
 
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle blue glow effect */
+.glow-input {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  transition: all 0.3s ease;
+}
+
+.glow-input:focus {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+  outline: none;
+}
+
 @theme inline{
   --animate-shine-pulse: shine-pulse 6s linear infinite;
   --animate-fade-in: fade-in 0.5s ease-in-out;
 }
+
 .code-editor-scroll::-webkit-scrollbar {
   width: 12px;
   height: 12px;
