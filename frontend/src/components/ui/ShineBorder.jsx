@@ -1,16 +1,16 @@
 import React from "react";
 import { cn } from "@/utils/cn";
 
-export const ShineBorder = ({ 
+export const ShineBorder = ({
   colors = ["#A07CFE", "#FE8FB5", "#FFBE7B"],
-  borderWidth = 2,
+  borderWidth = 1,
   borderRadius = 8,
   duration = 20,
   className = "",
-  children 
+  children
 }) => {
   const gradientColors = colors.join(", ");
-  
+
   return (
     <div
       className={cn(
@@ -33,7 +33,7 @@ export const ShineBorder = ({
           maskComposite: "exclude",
         }}
       />
-      
+
       <div className="relative z-10">
         {children}
       </div>
