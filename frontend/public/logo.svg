@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <g fill="#0B2545">
+    <circle cx="100" cy="100" r="75" />
+    
+    <!-- Top-right accent (made much wider) -->
+    <path d="M 160 45 L 195 0 L 70 95 Z" />
+    
+    <!-- Bottom-left accent (made much wider) -->
+    <path d="M 40 155 L 5 200 L 130 105 Z" />
+  </g>
+
+  <text 
+    x="50%" 
+    y="52%" 
+    dominant-baseline="central" 
+    text-anchor="middle" 
+    fill="#FFFFFF" 
+    font-family="Arial, Helvetica, sans-serif" 
+    font-weight="bold" 
+    font-size="100"
+  >
+    D
+  </text>
+</svg>
