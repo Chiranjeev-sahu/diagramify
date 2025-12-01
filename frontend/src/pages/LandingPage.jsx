@@ -40,17 +40,18 @@ export default function LandingPage() {
       className={cn(
         "w-full min-h-screen",
         "bg-[repeating-linear-gradient(-45deg,#e6e6e6_0,#e6e6e6_1px,transparent_0,transparent_50%)] bg-size-[10px_10px] bg-fixed",
-        "flex flex-col items-center"
+        "flex flex-col items-center",
+        "bg-[#fdfdfd]"
       )}
     >
       <Navbar />
       <main className="flex-1 flex flex-col items-center w-full">
-        <Hero/>
-        <div className="w-full border-y border-gray-300 h-4" aria-hidden = "true"></div>
-        <Features/>
-        <div className="w-full border-y border-gray-300 h-4" aria-hidden = "true"></div>
+        <Hero />
+        <div className="w-full border-y border-gray-300 h-4" aria-hidden="true"></div>
+        <Features />
+        <div className="w-full border-y border-gray-300 h-4" aria-hidden="true"></div>
       </main>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
