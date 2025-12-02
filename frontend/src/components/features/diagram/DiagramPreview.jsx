@@ -11,13 +11,27 @@ export default function DiagramPreview({ code }) {
   }, []);
 
   useEffect(() => {
-
     const el = containerRef.current;
-    if (!el) return;
+    if (!el || !code) return;
+
     let mounted = true;
 
     (async () => {
-      await renderInto(el, code);
+      try {
+        await renderInto(el, code);
+      } catch (error) {
+        console.error('Mermaid render error:', error);
+        if (mounted && el) {
+          el.innerHTML = `
+            <div class="flex items-center justify-center h-full p-8">
+              <div class="text-center">
+                <p class="text-red-600 font-semibold mb-2">Failed to render diagram</p>
+                <p class="text-sm text-gray-600">Invalid Mermaid syntax</p>
+              </div>
+            </div>
+          `;
+        }
+      }
 
       if (!mounted) return;
     })();
@@ -27,8 +41,13 @@ export default function DiagramPreview({ code }) {
     };
   }, [code]);
 
-  return <div ref={containerRef} className={cn(
-    'border-t border-l border-neutral-100 bg-[#edf4ff]',
-    'shadow-[7px_7px_0px_0px_black]',
-  )} />;
+  if (!code) {
+    return (
+      <div className="h-full flex items-center justify-center bg-slate-50">
+        <p className="text-slate-500">No diagram code available</p>
+      </div>
+    );
+  }
+
+  return <div ref={containerRef} className="w-full h-full flex items-center justify-center" />;
 }
