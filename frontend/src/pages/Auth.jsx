@@ -1,44 +1,52 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
-import { ShineBorder } from '@/components/ShineBorder';
-import ShimmerButton from '@/components/ShimmerButton';
-import DiagramPreview from '@/components/DiagramPreview';
+import { ShineBorder } from '@/components/ui/ShineBorder';
+import ShimmerButton from '@/components/ui/ShimmerButton';
+import DiagramCarousel from '@/components/features/diagram/DiagramCarousel';
 import { cn } from '@/utils/cn';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
+  const { login, register, isLoading } = useAuthStore();
 
-  const diagramCode = `
-    graph TD
-        A[Start Idea] --> B{Analyze}
-        B -->|Complex| C[Break Down]
-        B -->|Simple| D[Implement]
-        C --> D
-        D --> E[Success]
-        style E fill:#bbf,stroke:#333,stroke-width:2px,color:black
-        style A fill:#f9f,stroke:#333,stroke-width:2px,color:black
-  `;
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    let success = false;
+    if (isLogin) {
+      success = await login(formData.email, formData.password);
+    } else {
+      success = await register(formData.email, formData.password, formData.username);
+    }
+
+    if (success) {
+      navigate('/dashboard');
+    }
+  };
+
 
   return (
     <div className="min-h-screen w-full flex bg-white font-sans text-slate-900">
 
-      {/* Left Side - Diagram Preview (Desktop Only) */}
-      <div className="hidden md:flex w-1/2 flex-col items-center justify-center p-12 bg-slate-50/50 relative overflow-hidden">
-        {/* Background Blobs */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-          <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-purple-200/40 blur-[100px]" />
-          <div className="absolute bottom-[10%] -right-[10%] w-[50%] h-[50%] rounded-full bg-blue-200/40 blur-[100px]" />
-        </div>
-
-        <div className="z-10 w-full max-w-lg">
-          <div className="mb-8 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Visualize Your Ideas</h2>
-            <p className="text-slate-500">Turn complex logic into beautiful diagrams in seconds.</p>
-          </div>
-          <div className="transform hover:scale-[1.02] transition-transform duration-500 ease-out shadow-2xl shadow-slate-200/50 rounded-lg overflow-hidden bg-white">
-            <DiagramPreview code={diagramCode} />
-          </div>
-        </div>
+      {/* Left Side - Diagram Carousel (Desktop Only) */}
+      <div className="hidden md:flex w-1/2 h-screen">
+        <DiagramCarousel />
       </div>
 
       {/* Vertical Divider with Custom Pattern (Desktop Only) */}
@@ -80,6 +88,7 @@ const Auth = () => {
                   )}
                 />
                 <button
+                  type="button"
                   onClick={() => setIsLogin(true)}
                   className={cn(
                     "flex-1 py-2 text-sm font-medium relative z-10 transition-colors duration-200",
@@ -89,6 +98,7 @@ const Auth = () => {
                   Log In
                 </button>
                 <button
+                  type="button"
                   onClick={() => setIsLogin(false)}
                   className={cn(
                     "flex-1 py-2 text-sm font-medium relative z-10 transition-colors duration-200",
@@ -100,7 +110,7 @@ const Auth = () => {
               </div>
 
               {/* Form Section */}
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className={cn(
                   "space-y-4 transition-all duration-300 ease-in-out overflow-hidden p-1",
                   isLogin ? "h-[185px]" : "h-[265px]"
@@ -117,6 +127,9 @@ const Auth = () => {
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-purple-500 transition-colors" />
                       <input
                         type="text"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleInputChange}
                         placeholder="Full Name"
                         className="w-full bg-white border border-slate-200 rounded-xl px-10 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-purple-200 focus:ring-1 focus:ring-purple-200 transition-all shadow-sm"
                       />
@@ -128,7 +141,11 @@ const Auth = () => {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-purple-500 transition-colors" />
                     <input
                       type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       placeholder="Email Address"
+                      required
                       className="w-full bg-white border border-slate-200 rounded-xl px-10 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-purple-200 focus:ring-1 focus:ring-purple-200 transition-all shadow-sm"
                     />
                   </div>
@@ -138,7 +155,11 @@ const Auth = () => {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-purple-500 transition-colors" />
                     <input
                       type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
                       placeholder="Password"
+                      required
                       className="w-full bg-white border border-slate-200 rounded-xl px-10 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-purple-200 focus:ring-1 focus:ring-purple-200 transition-all shadow-sm"
                     />
                   </div>
@@ -156,13 +177,15 @@ const Auth = () => {
 
                 {/* Submit Button */}
                 <ShimmerButton
+                  type="submit"
                   className="w-full mt-6 shadow-lg shadow-slate-900/20"
                   background="rgba(0, 0, 0, 1)"
                   shimmerColor="#ffffff"
+                  disabled={isLoading}
                 >
                   <span className="flex items-center gap-2 text-sm font-semibold text-white">
-                    {isLogin ? 'Sign In' : 'Create Account'}
-                    <ArrowRight className="w-4 h-4" />
+                    {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+                    {!isLoading && <ArrowRight className="w-4 h-4" />}
                   </span>
                 </ShimmerButton>
               </form>
