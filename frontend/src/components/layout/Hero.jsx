@@ -55,8 +55,55 @@ export function Hero() {
   const remainingCredits = getRemainingTrials();
 
   return (
-    <section className="w-[95%] border-x border-gray-300 bg-[#fefcf9] py-16 sm:py-20 lg:py-24">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="w-[95%] mx-auto relative border-x border-gray-300 bg-[#fefcf9] py-16 sm:py-20 lg:py-24 overflow-hidden">
+      {/* Dashed Grid Background */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, #e7e5e4 1px, transparent 1px),
+            linear-gradient(to bottom, #e7e5e4 1px, transparent 1px)
+          `,
+          backgroundSize: "20px 20px",
+          backgroundPosition: "0 0, 0 0",
+          maskImage: `
+            repeating-linear-gradient(
+              to right,
+              black 0px,
+              black 3px,
+              transparent 3px,
+              transparent 8px
+            ),
+            repeating-linear-gradient(
+              to bottom,
+              black 0px,
+              black 3px,
+              transparent 3px,
+              transparent 8px
+            )
+          `,
+          WebkitMaskImage: `
+            repeating-linear-gradient(
+              to right,
+              black 0px,
+              black 3px,
+              transparent 3px,
+              transparent 8px
+            ),
+            repeating-linear-gradient(
+              to bottom,
+              black 0px,
+              black 3px,
+              transparent 3px,
+              transparent 8px
+            )
+          `,
+          maskComposite: "intersect",
+          WebkitMaskComposite: "source-in",
+        }}
+      />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center text-center space-y-10">
           <div
             className="flex items-center gap-2 px-6 py-2.5 bg-blue-50 border border-blue-200 rounded-full"
