@@ -1,5 +1,5 @@
 const corsOptions = {
-  origin: ["http://localhost:5173"],
+  origin: true, // Allow all origins temporarily for deployment
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 
