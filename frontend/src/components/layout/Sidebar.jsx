@@ -39,6 +39,7 @@ export default function Sidebar() {
 
   const handleNewDiagram = () => {
     setCurrentDiagram(null);
+    useChatStore.getState().reset(); // Reset chat history
   };
 
   return (

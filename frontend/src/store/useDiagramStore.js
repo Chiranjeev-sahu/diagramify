@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import apiClient from "@/api/apiClient";
 import { toast } from "sonner";
+import { useChatStore } from "./useChatStore";
 
 export const useDiagramStore = create((set, get) => ({
   latestDiagrams: [],
@@ -43,6 +44,8 @@ export const useDiagramStore = create((set, get) => ({
         currentDiagram: diagrams[0],
         isGenerating: false,
       });
+
+      useChatStore.getState().reset();
 
       get().fetchLatestDiagrams();
 
