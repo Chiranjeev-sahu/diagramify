@@ -7,6 +7,11 @@ const diagramSchema = new Schema(
       ref: "User",
       required: true,
     },
+    chatId: {
+      type: String,
+      required: true,
+      index: true, 
+    },
     promptText: {
       type: String,
       required: true,
@@ -20,7 +25,7 @@ const diagramSchema = new Schema(
     parentDiagramId: {
       type: Schema.Types.ObjectId,
       ref: "Diagram",
-      default: null, // For conversational editing, links to the previous version
+      default: null,
     },
     diagramType: {
       type: String,
@@ -28,16 +33,16 @@ const diagramSchema = new Schema(
       required: true,
     },
     diagramData: {
-      type: Schema.Types.Mixed, // Stores the JSON structure of the diagram
+      type: Schema.Types.Mixed,
       required: true,
     },
     diagramCode: {
-      type: String, // Stores raw code like Mermaid.js syntax
+      type: String,
       required: true,
     },
     isSaved: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     version: {
       type: Number,

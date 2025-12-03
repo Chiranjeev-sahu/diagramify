@@ -3,9 +3,9 @@ import {
   deleteDiagram,
   generateDiagrams,
   getAllUserDiagrams,
+  getLatestVersions,
   getDiagramById,
   repromptDiagram,
-  saveDiagram,
   updateDiagramCode,
 } from "../controllers/diagram.controller.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
@@ -16,17 +16,17 @@ diagramRouter.use(verifyJWT);
 //to generate new
 diagramRouter.route("/generate").post(generateDiagrams);
 
-//to fetch user's saved diagrams
+//to fetch user's saved diagrams (all versions)
 diagramRouter.route("/").get(getAllUserDiagrams);
+
+//to fetch latest versions for sidebar
+diagramRouter.route("/latest").get(getLatestVersions);
 
 // to fetch a specific diagram
 diagramRouter.route("/:id").get(getDiagramById);
 
-// to delete a specific diagram
+// to delete a specific diagram (deletes all versions with same chatId)
 diagramRouter.route("/:id").delete(deleteDiagram);
-
-//to save a diagram
-diagramRouter.route("/:id/save").patch(saveDiagram);
 
 // for conversational editing (replaces diagram with new version)
 diagramRouter.route("/:id/reprompt").patch(repromptDiagram);

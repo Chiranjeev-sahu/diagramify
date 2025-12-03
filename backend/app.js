@@ -4,6 +4,7 @@ import express, { urlencoded } from "express";
 import corsOptions from "./src/config/cors.config.js";
 import { errorMiddleware } from "./src/middleware/error.middleware.js";
 import diagramRouter from "./src/routes/diagram.routes.js";
+import chatRouter from "./src/routes/chat.routes.js";
 import userRouter from "./src/routes/user.routes.js";
 import { generateDiagramsPublic } from "./src/controllers/diagram.controller.js";
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 app.post("/api", generateDiagramsPublic);
 app.use("/api/v1", userRouter);
 app.use("/api/v1/diagrams", diagramRouter);
+app.use("/api/v1/chats", chatRouter);
 
 app.use(errorMiddleware);
 export { app };
