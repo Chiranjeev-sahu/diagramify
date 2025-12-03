@@ -53,7 +53,7 @@ const Auth = () => {
       <div className="hidden md:block w-5 h-screen bg-[repeating-linear-gradient(-45deg,#e6e6e6_0,#e6e6e6_1px,transparent_0,transparent_50%)] bg-size-[10px_10px] bg-fixed border-x border-slate-200/60 z-20"></div>
 
       {/* Right Side - Auth Form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-6 bg-white relative">
+      <div className="w-full md:w-1/2 flex items-center justify-center p-6 bg-[#fefcf9] relative">
         {/* Mobile Background Blobs */}
         <div className="md:hidden absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
           <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-purple-100/50 blur-[80px]" />
@@ -63,7 +63,7 @@ const Auth = () => {
         <div className="w-full max-w-md z-10">
           <ShineBorder
             className="w-full bg-white dark:bg-white backdrop-blur-xl border border-slate-200 p-0 overflow-hidden shadow-xl shadow-slate-200/40"
-            color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
+            color={["#1a1cfe", "#0001f7", "#5924ef"]}
             borderRadius={10}
           >
             <div className="p-8">
