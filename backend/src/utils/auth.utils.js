@@ -30,6 +30,7 @@ const sendAuthResponseWithTokens = async (res, user, statusCode, message) => {
   const options = {
     httpOnly: true,
     secure: true,
+    sameSite: "None",
   };
 
   return res
