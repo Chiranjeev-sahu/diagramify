@@ -46,6 +46,10 @@ export const useDiagramStore = create((set, get) => ({
       });
 
       useChatStore.getState().reset();
+      
+      if (diagrams[0].chatId) {
+        useChatStore.getState().fetchChatHistory(diagrams[0].chatId);
+      }
 
       get().fetchLatestDiagrams();
 
