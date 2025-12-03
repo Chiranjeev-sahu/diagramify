@@ -51,7 +51,10 @@ export default function Sidebar() {
       }}
       className={`bg-slate-900 min-h-screen flex flex-col transition-all relative duration-300 ${isOpen ? 'w-64' : 'w-16'}`}
     >
-      <div className="h-16 flex items-center px-4 border-b border-slate-700">
+      <div
+        className="h-16 flex items-center px-4 border-b border-slate-700 cursor-pointer hover:bg-slate-800/50 transition-colors"
+        onClick={() => navigate('/')}
+      >
         <img src="/logo.svg" alt="D" className="w-10 h-10 shrink-0" />
         {isOpen && (
           <span className="font-bold text-white ml-2">Diagramify</span>
