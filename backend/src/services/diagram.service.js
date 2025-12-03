@@ -142,7 +142,7 @@ export const createNewDiagramVersion = async (userId, parentDiagramId, newPrompt
   const newDiagramVersion = await Diagram.create({
     userId,
     chatId,
-    promptText: newPrompt,
+    promptText: newPrompt.prompt,
     parentDiagramId,
     diagramType: parentDiagram.diagramType,
     diagramData: new_diagramData,
