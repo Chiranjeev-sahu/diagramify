@@ -16,7 +16,7 @@ export function Footer() {
           {/* Social Links */}
           <nav className="flex gap-6" aria-label="Social media links">
             <a
-              href="https://github.com"
+              href="https://github.com/Chiranjeev-sahu"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-slate-400 hover:text-blue-400 transition-colors"
@@ -24,7 +24,7 @@ export function Footer() {
               GitHub
             </a>
             <a
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/in/chiranjeev-sahu/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-slate-400 hover:text-blue-400 transition-colors"
@@ -32,7 +32,7 @@ export function Footer() {
               LinkedIn
             </a>
             <a
-              href="https://twitter.com"
+              href="https://x.com/chiruexe"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-slate-400 hover:text-blue-400 transition-colors"
