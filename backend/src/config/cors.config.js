@@ -1,5 +1,5 @@
 const corsOptions = {
-  origin: true, // Allow all origins temporarily for deployment
+  origin: ["http://localhost:5173", "https://diagramify-theta.vercel.app"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 
