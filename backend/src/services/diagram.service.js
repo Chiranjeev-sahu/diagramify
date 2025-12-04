@@ -4,7 +4,7 @@ import { Chat } from "../models/chat.model.js";
 import { User } from "../models/user.model.js";
 import { classifyPromptDiagramTypes } from "./ai/classifier.js";
 import { generateDiagramData } from "./ai/generator.js";
-import { diagramDataToMermaidCode } from "../utils/diagram.converter.js";
+import { diagramDataToMermaidCode, mermaidCodeToDiagramData } from "../utils/diagram.converter.js";
 import { interpretPromptToInstruction, manipulateDiagramData } from "./ai/manipulator.js";
 
 export const createDiagramFromPrompt = async (userId, prompt) => {
@@ -257,9 +257,16 @@ export const updateDiagramCode = async (userId, diagramId, newCode) => {
     throw new Error("Forbidden");
   }
 
+  const newDiagramData = await mermaidCodeToDiagramData(newCode, diagram.diagramType);
+
+  const updateFields = { diagramCode: newCode };
+  if (newDiagramData && !newDiagramData.error) {
+    updateFields.diagramData = newDiagramData;
+  }
+
   const updatedDiagram = await Diagram.findByIdAndUpdate(
     diagramId,
-    { $set: { diagramCode: newCode } },
+    { $set: updateFields },
     { new: true }
   );
 
