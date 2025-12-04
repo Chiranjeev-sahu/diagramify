@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   deleteDiagram,
   generateDiagrams,
-  getAllUserDiagrams,
   getLatestVersions,
   getDiagramById,
   repromptDiagram,
@@ -15,9 +14,6 @@ const diagramRouter = Router();
 diagramRouter.use(verifyJWT);
 //to generate new
 diagramRouter.route("/generate").post(generateDiagrams);
-
-//to fetch user's saved diagrams (all versions)
-diagramRouter.route("/").get(getAllUserDiagrams);
 
 //to fetch latest versions for sidebar
 diagramRouter.route("/latest").get(getLatestVersions);

@@ -4,13 +4,7 @@ import { Chat } from "../models/chat.model.js";
 import { User } from "../models/user.model.js";
 import { classifyPromptDiagramTypes } from "./ai/classifier.js";
 import { generateDiagramData } from "./ai/generator.js";
-import {
-  convertERDiagramDataToMermaid,
-  convertFlowchartDataToMermaid,
-  convertGanttChartDataToMermaid,
-  convertSequenceDiagramDataToMermaid,
-  diagramDataToMermaidCode,
-} from "../utils/diagram.converter.js";
+import { diagramDataToMermaidCode } from "../utils/diagram.converter.js";
 import { interpretPromptToInstruction, manipulateDiagramData } from "./ai/manipulator.js";
 
 export const createDiagramFromPrompt = async (userId, prompt) => {
@@ -48,7 +42,7 @@ export const createDiagramFromPrompt = async (userId, prompt) => {
   const saveDiagrams = generatedDiagramData.map(async (diagramData) => {
     if (!diagramData) return null;
 
-    const diagramCode = convertDiagramDataToMermaid(diagramData);
+    const diagramCode = diagramDataToMermaidCode(diagramData);
     if (!diagramCode) return null;
 
     const chatId = crypto.randomUUID();
@@ -272,35 +266,6 @@ export const updateDiagramCode = async (userId, diagramId, newCode) => {
   return updatedDiagram;
 };
 
-export const getAllUserDiagrams = async (userId) => {
-  const user = await User.findById(userId).populate({
-    path: "diagramsGenerated",
-    match: { isSaved: true },
-    options: { sort: { updatedAt: -1 } },
-  });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  return user.diagramsGenerated;
-};
-
-function convertDiagramDataToMermaid(diagramData) {
-  switch (diagramData.diagramType) {
-    case "Flowchart":
-      return convertFlowchartDataToMermaid(diagramData);
-    case "Sequence":
-      return convertSequenceDiagramDataToMermaid(diagramData);
-    case "ER":
-      return convertERDiagramDataToMermaid(diagramData);
-    case "Gantt":
-      return convertGanttChartDataToMermaid(diagramData);
-    default:
-      return null;
-  }
-}
-
 export const generateDiagramCodesPublic = async (prompt) => {
   const escapedPrompt = prompt
     .replace(/\\/g, "\\\\")
@@ -336,7 +301,7 @@ export const generateDiagramCodesPublic = async (prompt) => {
   const diagramCodes = generatedDiagramData
     .map((diagramData) => {
       if (!diagramData) return null;
-      return convertDiagramDataToMermaid(diagramData);
+      return diagramDataToMermaidCode(diagramData);
     })
     .filter(Boolean);
 

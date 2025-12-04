@@ -99,15 +99,6 @@ export const updateDiagramCode = asyncHandler(async (req, res) => {
     .json(new APIResponse(200, updatedDiagram, "Diagram code updated"));
 });
 
-export const getAllUserDiagrams = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
-  const diagrams = await diagramService.getAllUserDiagrams(userId);
-
-  return res
-    .status(200)
-    .json(new APIResponse(200, diagrams, "Retrieved saved diagrams"));
-});
-
 const freeTrialUsage = {};
 
 export const generateDiagramsPublic = asyncHandler(async (req, res) => {
