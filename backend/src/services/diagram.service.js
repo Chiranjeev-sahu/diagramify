@@ -6,7 +6,7 @@ import { classifyPromptDiagramTypes } from "./ai/classifier.js";
 import { generateDiagramData } from "./ai/generator.js";
 import { diagramDataToMermaidCode, mermaidCodeToDiagramData } from "../utils/diagram.converter.js";
 import { interpretPromptToInstruction, manipulateDiagramData } from "./ai/manipulator.js";
-
+import { APIError } from "../utils/apiError.js";
 export const createDiagramFromPrompt = async (userId, prompt) => {
   const escapedPrompt = prompt
     .replace(/\\/g, "\\\\")
@@ -16,7 +16,7 @@ export const createDiagramFromPrompt = async (userId, prompt) => {
     .replace(/\t/g, "\\t");
 
   if (!escapedPrompt) {
-    throw new Error("Prompt text required");
+    throw new APIError(400,"Prompt text required");
   }
 
   const relevantTypes = await classifyPromptDiagramTypes(escapedPrompt);
@@ -36,7 +36,7 @@ export const createDiagramFromPrompt = async (userId, prompt) => {
     .map((result) => result.value);
 
   if (generatedDiagramData.length === 0) {
-    throw new Error("AI failed to generate any diagrams");
+    throw new APIError(503,"AI failed to generate any diagrams");
   }
 
   const saveDiagrams = generatedDiagramData.map(async (diagramData) => {
@@ -105,16 +105,16 @@ export const createNewDiagramVersion = async (userId, parentDiagramId, newPrompt
     .replace(/\t/g, "\\t");
 
   if (!escapedNewPrompt) {
-    throw new Error("Re-prompt text is required");
+    throw new APIError(400,"Re-prompt text is required");
   }
 
   const parentDiagram = await Diagram.findById(parentDiagramId);
   if (!parentDiagram) {
-    throw new Error("Original diagram not found");
+    throw new APIError(404,"Original diagram not found");
   }
 
   if (parentDiagram.userId.toString() !== userId.toString()) {
-    throw new Error("You are not authorized to edit this diagram");
+    throw new APIError(403,"You are not authorized to edit this diagram");
   }
 
   const current_diagramData = parentDiagram.diagramData;
@@ -198,11 +198,11 @@ export const getDiagramById = async (userId, diagramId) => {
   const diagram = await Diagram.findById(diagramId);
 
   if (!diagram) {
-    throw new Error("Diagram not found");
+    throw new APIError(404,"Diagram not found");
   }
 
   if (diagram.userId.toString() !== userId.toString()) {
-    throw new Error("You are not authorized to view this diagram");
+    throw new APIError(403,"You are not authorized to view this diagram");
   }
 
   return diagram;
@@ -212,11 +212,11 @@ export const deleteDiagramFamily = async (userId, diagramId) => {
   const diagram = await Diagram.findById(diagramId);
 
   if (!diagram) {
-    throw new Error("Diagram not found");
+    throw new APIError(404,"Diagram not found");
   }
 
   if (diagram.userId.toString() !== userId.toString()) {
-    throw new Error("Forbidden");
+    throw new APIError(403,"Forbidden");
   }
 
   const chatId = diagram.chatId;
@@ -250,11 +250,11 @@ export const updateDiagramCode = async (userId, diagramId, newCode) => {
   const diagram = await Diagram.findById(diagramId);
 
   if (!diagram) {
-    throw new Error("Diagram not found");
+    throw new APIError(404,"Diagram not found");
   }
 
   if (diagram.userId.toString() !== userId.toString()) {
-    throw new Error("Forbidden");
+    throw new APIError(403,"Forbidden");
   }
 
   const newDiagramData = await mermaidCodeToDiagramData(newCode, diagram.diagramType);
@@ -282,7 +282,7 @@ export const generateDiagramCodesPublic = async (prompt) => {
     .replace(/\t/g, "\\t");
 
   if (!escapedPrompt) {
-    throw new Error("Prompt text required");
+    throw new APIError(400,"Prompt text required");
   }
 
   const relevantTypes = await classifyPromptDiagramTypes(escapedPrompt);
@@ -302,7 +302,7 @@ export const generateDiagramCodesPublic = async (prompt) => {
     .map((result) => result.value);
 
   if (generatedDiagramData.length === 0) {
-    throw new Error("AI failed to generate any diagrams");
+    throw new APIError(503,"AI failed to generate any diagrams");
   }
 
   const diagramCodes = generatedDiagramData
