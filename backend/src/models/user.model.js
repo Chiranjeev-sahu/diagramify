@@ -9,13 +9,13 @@ const userSchema = new Schema(
       unique: true,
       required: true,
       lowercase: true,
-      trimmed: true,
+      trim: true,
       index: true,
     },
     username: {
       type: String,
       required: true,
-      trimmed: true,
+      trim: true,
     },
     password: {
       type: String,
@@ -37,7 +37,9 @@ const userSchema = new Schema(
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) next();
+  // In async middleware, use 'return' instead of calling 'next()'
+  // Mongoose automatically waits for the Promise to resolve
+  if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 

@@ -60,6 +60,7 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
     throw new APIError(401, "Invalid user credentials");
   }
+// TODO: Refactor to remove duplicate user fetch - use destructuring instead
 
   const loggedInUser = await User.findById(user._id);
 
