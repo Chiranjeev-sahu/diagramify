@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 export const classifyPromptDiagramTypes = async (promptText) => {
   console.log("classifyPromptDiagramTypes - START - Prompt:", promptText);
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
 
     const systemPrompt = `You are an expert diagram classifier. The user will provide a prompt.
 Your ONLY job is to identify the SINGLE BEST diagram type for the prompt:
@@ -49,10 +49,10 @@ Return ONLY a JSON object with the best match.`;
         responseSchema: schema,
       },
     });
-    
+
     const response = result.response;
     console.log(JSON.stringify(response, null, 2));
-    
+
     if (
       !response.candidates ||
       !response.candidates[0].content ||
@@ -64,17 +64,17 @@ Return ONLY a JSON object with the best match.`;
       );
       throw new Error("Invalid response from AI classifier.");
     }
-    
+
     const content = response.candidates[0].content.parts[0].text;
     const parsedData = JSON.parse(content);
-    
+
     console.log(
       "classifyPromptDiagramTypes - END - Best Type:",
       parsedData.bestType,
       "Reasoning:",
       parsedData.reasoning
     );
-    
+
     return [parsedData.bestType];
   } catch (error) {
     console.error("classifyPromptDiagramTypes - ERROR:", error);
