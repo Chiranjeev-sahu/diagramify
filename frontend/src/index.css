@@ -87,6 +87,21 @@
 @theme inline{
   --animate-shine-pulse: shine-pulse 6s linear infinite;
   --animate-fade-in: fade-in 0.5s ease-in-out;
+  --animate-stagger-fade-in: fade-in 0.5s ease-out forwards;
+}
+
+.grid-background {
+  background-image:
+    linear-gradient(to right, #f1f5f9 1px, transparent 1px),
+    linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .code-editor-scroll::-webkit-scrollbar {
@@ -95,7 +110,7 @@
 }
 
 .code-editor-scroll::-webkit-scrollbar-track {
-  background: #1e293b; 
+  background: #1e293b;
 }
 
 .code-editor-scroll::-webkit-scrollbar-thumb {
