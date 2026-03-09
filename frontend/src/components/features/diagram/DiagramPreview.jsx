@@ -1,14 +1,14 @@
-// src/features/diagram/components/DiagramPreview.jsx
-import { useEffect, useRef } from "react";
 import { initializeMermaid, renderInto } from "@/lib/mermaid";
-import { cn } from "@/utils/cn";
+import { useDiagramStore } from "@/store/useDiagramStore";
+import { useEffect, useRef } from "react";
 
 export default function DiagramPreview({ code }) {
   const containerRef = useRef(null);
+  const { currentTheme } = useDiagramStore();
 
   useEffect(() => {
-    initializeMermaid({ theme: "forest" });
-  }, []);
+    initializeMermaid({ theme: currentTheme });
+  }, [currentTheme]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -20,7 +20,7 @@ export default function DiagramPreview({ code }) {
       try {
         await renderInto(el, code);
       } catch (error) {
-        console.error('Mermaid render error:', error);
+        console.error("Mermaid render error:", error);
         if (mounted && el) {
           el.innerHTML = `
             <div class="flex items-center justify-center h-full p-8">
@@ -39,7 +39,7 @@ export default function DiagramPreview({ code }) {
     return () => {
       mounted = false;
     };
-  }, [code]);
+  }, [code, currentTheme]);
 
   if (!code) {
     return (
@@ -49,5 +49,10 @@ export default function DiagramPreview({ code }) {
     );
   }
 
-  return <div ref={containerRef} className="w-full h-full flex items-center justify-center" />;
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-full flex items-center justify-center"
+    />
+  );
 }
