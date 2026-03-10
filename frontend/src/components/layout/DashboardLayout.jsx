@@ -1,21 +1,20 @@
-import { useEffect } from 'react';
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import Sidebar from '@/components/layout/Sidebar';
-import AIChat from '@/components/features/chat/AIChat';
-import DiagramPreview from '@/components/features/diagram/DiagramPreview';
-import ZoomableCanvas from '@/components/features/diagram/ZoomableCanvas';
-import CodeEditor from '@/components/ui/CodeEditor';
-import EmptyState from '@/components/features/diagram/EmptyState';
-import { useDiagramStore } from '@/store/useDiagramStore';
-import { useDebounce } from '@/hooks/useDebounce';
-import { DiagramGeneratingLoader } from '@/components/ui/LoadingStates';
+import AIChat from "@/components/features/chat/AIChat";
+import DiagramPreview from "@/components/features/diagram/DiagramPreview";
+import EmptyState from "@/components/features/diagram/EmptyState";
+import ZoomableCanvas from "@/components/features/diagram/ZoomableCanvas";
+import Sidebar from "@/components/layout/Sidebar";
+import CodeEditor from "@/components/ui/CodeEditor";
+import { DiagramGeneratingLoader } from "@/components/ui/LoadingStates";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useDiagramStore } from "@/store/useDiagramStore";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export default function DashboardLayout() {
   const {
     currentDiagram,
     updateDiagramCode,
     updateCurrentDiagramCodeLocally,
-    isGenerating
+    isGenerating,
   } = useDiagramStore();
 
   // Debounced auto-save for code editor
@@ -33,17 +32,8 @@ export default function DashboardLayout() {
     debouncedSave(currentDiagram._id, newCode);
   };
 
-  // Debug logging
-  useEffect(() => {
-    if (currentDiagram) {
-      console.log('Current diagram:', currentDiagram);
-      console.log('Diagram code:', currentDiagram.diagramCode);
-    }
-  }, [currentDiagram]);
-
   return (
     <div className="min-h-screen bg-slate-50 flex relative">
-
       <Sidebar />
 
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
@@ -53,7 +43,6 @@ export default function DashboardLayout() {
         ) : (
           /* Show PanelGroup when diagram exists */
           <PanelGroup direction="horizontal">
-
             {/* LEFT SIDE: Diagram Preview */}
             <Panel defaultSize={50} minSize={25}>
               <div className="h-full bg-white border-r border-slate-200">
@@ -61,7 +50,7 @@ export default function DashboardLayout() {
                   <DiagramGeneratingLoader />
                 ) : (
                   <ZoomableCanvas diagramTitle={currentDiagram?.title}>
-                    <DiagramPreview code={currentDiagram?.diagramCode || ''} />
+                    <DiagramPreview code={currentDiagram?.diagramCode || ""} />
                   </ZoomableCanvas>
                 )}
               </div>
@@ -72,14 +61,12 @@ export default function DashboardLayout() {
             {/* RIGHT SIDE: Code + Chat */}
             <Panel defaultSize={50}>
               <PanelGroup direction="vertical">
-
                 {/* TOP: Code Editor */}
                 <Panel defaultSize={50} minSize={20}>
-                  <div className="h-full bg-slate-900">
+                  <div className="h-full bg-[#0f172a]">
                     <CodeEditor
-                      code={currentDiagram?.diagramCode || ''}
+                      code={currentDiagram?.diagramCode || ""}
                       onChange={handleCodeChange}
-                      language="mermaid"
                     />
                   </div>
                 </Panel>
@@ -90,13 +77,11 @@ export default function DashboardLayout() {
                 <Panel defaultSize={50} minSize={20}>
                   <AIChat />
                 </Panel>
-
               </PanelGroup>
             </Panel>
           </PanelGroup>
         )}
       </main>
-
     </div>
   );
 }
