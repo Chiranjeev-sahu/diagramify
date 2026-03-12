@@ -1,6 +1,6 @@
-import { create } from "zustand";
 import apiClient from "@/api/apiClient";
 import { toast } from "sonner";
+import { create } from "zustand";
 import { useChatStore } from "./useChatStore";
 
 export const useDiagramStore = create((set, get) => ({
@@ -9,6 +9,32 @@ export const useDiagramStore = create((set, get) => ({
   isGenerating: false,
   isLoading: false,
   error: null,
+  currentTheme: "default",
+
+  setTheme: (theme) => set({ currentTheme: theme }),
+
+  getDiagramById: async (diagramId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await apiClient.get(`/api/v1/diagrams/${diagramId}`);
+      const diagram = response.data.data;
+
+      set({ currentDiagram: diagram, isLoading: false });
+
+      // Also refresh the chat for this diagram's conversation thread
+      if (diagram.chatId) {
+        useChatStore.getState().fetchChatHistory(diagram.chatId);
+      }
+
+      return diagram;
+    } catch (error) {
+      const errorMsg =
+        error.response?.data?.message || "Failed to load diagram version";
+      set({ error: errorMsg, isLoading: false });
+      toast.error(errorMsg);
+      return null;
+    }
+  },
 
   fetchLatestDiagrams: async () => {
     set({ isLoading: true, error: null });
@@ -19,7 +45,8 @@ export const useDiagramStore = create((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Failed to fetch diagrams";
+      const errorMsg =
+        error.response?.data?.message || "Failed to fetch diagrams";
       set({ error: errorMsg, isLoading: false });
       toast.error(errorMsg);
     }
@@ -46,19 +73,22 @@ export const useDiagramStore = create((set, get) => ({
       });
 
       useChatStore.getState().reset();
-      
+
       if (diagrams[0].chatId) {
         useChatStore.getState().fetchChatHistory(diagrams[0].chatId);
       }
 
       get().fetchLatestDiagrams();
 
-      toast.success(`Generated ${diagrams.length} diagram${diagrams.length > 1 ? "s" : ""}!`);
+      toast.success(
+        `Generated ${diagrams.length} diagram${diagrams.length > 1 ? "s" : ""}!`,
+      );
       return diagrams;
     } catch (error) {
       console.error("Diagram generation error:", error);
       console.error("Error response:", error.response?.data);
-      const errorMsg = error.response?.data?.message || "Failed to generate diagram";
+      const errorMsg =
+        error.response?.data?.message || "Failed to generate diagram";
       set({ error: errorMsg, isGenerating: false });
       toast.error(errorMsg);
       return [];
@@ -70,7 +100,7 @@ export const useDiagramStore = create((set, get) => ({
     try {
       const response = await apiClient.patch(
         `/api/v1/diagrams/${diagramId}/reprompt`,
-        { newPrompt: { prompt } }
+        { newPrompt: { prompt } },
       );
 
       const newVersion = response.data.data;
@@ -84,7 +114,8 @@ export const useDiagramStore = create((set, get) => ({
 
       return newVersion;
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Failed to update diagram";
+      const errorMsg =
+        error.response?.data?.message || "Failed to update diagram";
       set({ error: errorMsg, isGenerating: false });
       toast.error(errorMsg);
       return null;
@@ -96,7 +127,7 @@ export const useDiagramStore = create((set, get) => ({
     try {
       const response = await apiClient.put(
         `/api/v1/diagrams/${diagramId}/code`,
-        { code }
+        { code },
       );
 
       const updatedDiagram = response.data.data;
@@ -129,11 +160,12 @@ export const useDiagramStore = create((set, get) => ({
       });
 
       toast.success(
-        `Deleted ${response.data.data.deletedCount} diagram version(s)`
+        `Deleted ${response.data.data.deletedCount} diagram version(s)`,
       );
       return true;
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Failed to delete diagram";
+      const errorMsg =
+        error.response?.data?.message || "Failed to delete diagram";
       set({ error: errorMsg, isLoading: false });
       toast.error(errorMsg);
       return false;
@@ -144,12 +176,10 @@ export const useDiagramStore = create((set, get) => ({
     set({ currentDiagram: diagram });
   },
 
-  
   clearCurrentDiagram: () => {
     set({ currentDiagram: null });
   },
 
-  
   updateCurrentDiagramCodeLocally: (newCode) => {
     const current = get().currentDiagram;
     if (current) {
@@ -162,12 +192,10 @@ export const useDiagramStore = create((set, get) => ({
     }
   },
 
-  
   clearError: () => {
     set({ error: null });
   },
 
-  
   reset: () => {
     set({
       latestDiagrams: [],

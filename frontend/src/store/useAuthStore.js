@@ -81,10 +81,16 @@ export const useAuthStore = create((set, get) => ({
   logout: async () => {
     try {
       await apiClient.post("/api/v1/logout");
-      set({ user: null, isAuthenticated: false });
+      // Reset all stores to clear sensitive/cached data
+      get().reset();
+      const { useDiagramStore } = await import("./useDiagramStore");
+      const { useChatStore } = await import("./useChatStore");
+      useDiagramStore.getState().reset();
+      useChatStore.getState().reset();
+
       toast.success("Logged out successfully");
     } catch (error) {
-      set({ user: null, isAuthenticated: false });
+      get().reset();
       toast.error("Logout failed, but you've been logged out locally");
     }
   },

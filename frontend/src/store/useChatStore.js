@@ -1,12 +1,12 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import apiClient from "@/api/apiClient";
 import { toast } from "sonner";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export const useChatStore = create(
   persist(
-    (set, get) => ({
-      currentChat: null, 
+    (set) => ({
+      currentChat: null,
       isLoading: false,
       error: null,
 
@@ -48,6 +48,6 @@ export const useChatStore = create(
       partialize: (state) => ({
         currentChat: state.currentChat,
       }),
-    }
-  )
+    },
+  ),
 );
