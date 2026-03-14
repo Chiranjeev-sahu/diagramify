@@ -304,7 +304,7 @@ export default function Sidebar() {
           e.stopPropagation();
           setSidebarCollapsed(!sidebarCollapsed);
         }}
-        className="absolute right-0 translate-x-1/2 top-20 -translate-y-1/2 w-8 h-8 rounded-xl bg-[#0f172a] border border-white/10 flex items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800 transition-all shadow-xl z-20 group"
+        className="absolute right-0 translate-x-1/2 top-20 -translate-y-1/2 w-8 h-8 rounded-full bg-[#0f172a] border border-white/30 flex items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800 hover:border-white/50 transition-all shadow-xl z-20 group"
       >
         {!sidebarCollapsed ? (
           <ChevronLeft className="w-5 h-5 group-hover:scale-110 transition-transform" />
