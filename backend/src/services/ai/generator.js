@@ -23,7 +23,7 @@ export const generateDiagramData = async (promptText, diagramType) => {
   const { schema, generationPrompt } = config;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
 
     const result = await model.generateContent({
       systemInstruction: {
