@@ -346,6 +346,70 @@ export const convertGanttChartDataToMermaid = (diagramData) => {
   return mermaidCode;
 };
 
+export const convertClassDiagramDataToMermaid = (diagramData) => {
+  console.log("convertClassDiagramDataToMermaid - START", diagramData);
+  if (!diagramData || !Array.isArray(diagramData.classes) || !Array.isArray(diagramData.relationships)) {
+    throw new Error("Invalid Class diagramData structure.");
+  }
+
+  let mermaidCode = "classDiagram\n";
+  
+  diagramData.classes.forEach((cls) => {
+    mermaidCode += `    class ${cls.name} {\n`;
+    if (cls.attributes) {
+      cls.attributes.forEach((attr) => {
+        mermaidCode += `        ${attr}\n`;
+      });
+    }
+    if (cls.methods) {
+      cls.methods.forEach((method) => {
+        mermaidCode += `        ${method}\n`;
+      });
+    }
+    mermaidCode += "    }\n";
+  });
+
+  diagramData.relationships.forEach((rel) => {
+    let relType = "";
+    switch (rel.relationshipType) {
+      case "inheritance": relType = "<|--"; break;
+      case "composition": relType = "*--"; break;
+      case "aggregation": relType = "o--"; break;
+      case "association": relType = "<--"; break;
+      case "dependency": relType = "<.."; break;
+      case "realization": relType = "<|.."; break;
+      case "dashed": relType = ".."; break;
+      case "solid": default: relType = "--"; break;
+    }
+    const label = rel.label ? ` : ${rel.label}` : "";
+    mermaidCode += `    ${rel.fromClass} ${relType} ${rel.toClass}${label}\n`;
+  });
+
+  return mermaidCode;
+};
+
+export const convertStateDiagramDataToMermaid = (diagramData) => {
+  console.log("convertStateDiagramDataToMermaid - START", diagramData);
+  if (!diagramData || !Array.isArray(diagramData.states) || !Array.isArray(diagramData.transitions)) {
+    throw new Error("Invalid State diagramData structure.");
+  }
+
+  let mermaidCode = "stateDiagram-v2\n";
+
+  diagramData.states.forEach((state) => {
+    if (state.id !== "[*]") {
+      mermaidCode += `    ${state.id} : ${state.name}\n`;
+    }
+  });
+
+  diagramData.transitions.forEach((trans) => {
+    const label = trans.label ? ` : ${trans.label}` : "";
+    mermaidCode += `    ${trans.from} --> ${trans.to}${label}\n`;
+  });
+
+  return mermaidCode;
+};
+
 export const diagramDataToMermaidCode = (diagramData) => {
   console.log("diagramDataToMermaidCode - START", diagramData);
   if (!diagramData || !diagramData.diagramType) {
@@ -372,6 +436,12 @@ export const diagramDataToMermaidCode = (diagramData) => {
         break;
       case "Gantt":
         mermaidCode = convertGanttChartDataToMermaid(diagramData);
+        break;
+      case "Class":
+        mermaidCode = convertClassDiagramDataToMermaid(diagramData);
+        break;
+      case "State":
+        mermaidCode = convertStateDiagramDataToMermaid(diagramData);
         break;
       default:
         const errorMessage = `Unsupported diagram type for conversion: ${diagramData.diagramType}`;

@@ -14,6 +14,8 @@ Your ONLY job is to identify the SINGLE BEST diagram type for the prompt:
 - "Sequence": For time-based interactions between actors, API calls, message flows.
 - "ER": For database schemas, entities, relationships, data models.
 - "Gantt": For project schedules, timelines, tasks with dates.
+- "Class": For object-oriented class structures, attributes, methods, inheritance.
+- "State": For state machines, transitions between states, lifecycles.
 
 Choose the ONE type that best represents the user's intent.
 Return ONLY a JSON object with the best match.`;
@@ -23,7 +25,7 @@ Return ONLY a JSON object with the best match.`;
       properties: {
         bestType: {
           type: "string",
-          enum: ["Flowchart", "Sequence", "ER", "Gantt"],
+          enum: ["Flowchart", "Sequence", "ER", "Gantt", "Class", "State"],
         },
         reasoning: {
           type: "string",
