@@ -218,4 +218,101 @@ export const DIAGRAM_SCHEMAS_AND_PROMPTS = {
                     - 'Task Name : 2024-01-01, 2024-01-02' maps to {"name": "Task Name", "start": "2024-01-01", "end": "2024-01-02"}.
                     Return ONLY the valid JSON.`,
   },
+  Class: {
+    schema: {
+      type: "object",
+      properties: {
+        diagramType: { type: "string", enum: ["Class"] },
+        title: { type: "string", description: "A short, descriptive title for the diagram" },
+        classes: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              attributes: {
+                type: "array",
+                items: { type: "string" },
+              },
+              methods: {
+                type: "array",
+                items: { type: "string" },
+              },
+            },
+            required: ["name"],
+          },
+        },
+        relationships: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              fromClass: { type: "string" },
+              toClass: { type: "string" },
+              relationshipType: {
+                type: "string",
+                enum: [
+                  "inheritance",
+                  "composition",
+                  "aggregation",
+                  "association",
+                  "dependency",
+                  "realization",
+                  "solid",
+                  "dashed",
+                ],
+              },
+              label: { type: "string", nullable: true },
+            },
+            required: ["fromClass", "toClass", "relationshipType"],
+          },
+        },
+      },
+      required: ["diagramType", "title", "classes", "relationships"],
+      propertyOrdering: ["diagramType", "title", "classes", "relationships"],
+    },
+    generationPrompt: `You are an AI assistant that generates structured JSON data for a Class diagram based on a user's natural language request. Ensure the output is valid JSON. Attributes and methods should follow standard UML notation (+, -, #). Only output the JSON.`,
+    parsingPrompt: `You are an expert Mermaid.js parser for Class Diagrams. Parse the code into JSON complying with the schema. 
+                    - 'class A {}' maps to {"name": "A"} with contents mapping to attributes or methods.
+                    - Inheritance and relationship types map to specific string enumerations.
+                    Return ONLY valid JSON.`,
+  },
+  State: {
+    schema: {
+      type: "object",
+      properties: {
+        diagramType: { type: "string", enum: ["State"] },
+        title: { type: "string", description: "A short, descriptive title for the diagram" },
+        states: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              name: { type: "string" },
+            },
+            required: ["id", "name"],
+          },
+        },
+        transitions: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              from: { type: "string" },
+              to: { type: "string" },
+              label: { type: "string", nullable: true },
+            },
+            required: ["from", "to"],
+          },
+        },
+      },
+      required: ["diagramType", "title", "states", "transitions"],
+      propertyOrdering: ["diagramType", "title", "states", "transitions"],
+    },
+    generationPrompt: `You are an AI assistant that generates structured JSON data for a State diagram based on a user's natural language request. Use '[*]' to define the initial state and final state when appropriate. Provide a descriptive title. Only output the JSON.`,
+    parsingPrompt: `You are an expert Mermaid.js parser for State Diagrams. Parse the code into JSON adhering to the schema.
+                    - '[*] --> StateA' means from '[*]' to 'StateA'.
+                    Return ONLY valid JSON.`,
+  },
 };

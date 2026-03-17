@@ -11,12 +11,12 @@ export const interpretPromptToInstruction = async (
 ) => {
   console.log("interpretPromptToInstruction - START");
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
     const systemPrompt = `You are an AI assistant designed to convert a user's natural language request for diagram modification into a structured JSON instruction.
                           The current diagram data is provided to help resolve references (e.g., node names to IDs).
                           Output only a JSON object following these rules:
-                          - If changing text: {"action": "update_element", "element_id": "resolved_id", "updates": {"text": "new_text"}}
-                          - If adding an element: {"action": "add_element", "new_element": {"type": "type", "text": "text"}, "connections": [{"from": "existing_id", "to": "new_id", "label": "label?"}]}
+                          - If changing an element: {"action": "update_element", "element_id": "resolved_id", "updates": {"property_to_change": "new_value"}}
+                          - If adding an element: {"action": "add_element", "new_element": {"type": "type", "text": "text", "etc": "..."}, "connections": [{"from": "existing_id", "to": "new_id", "label": "label?"}]}
                           - If removing an element: {"action": "remove_element", "element_id": "resolved_id"}
                           - Be precise. If an element cannot be resolved from currentDiagramData, throw an error.
                           Current Diagram Data:
@@ -44,29 +44,40 @@ export const interpretPromptToInstruction = async (
             element_id: { type: "string", nullable: true },
             updates: {
               type: "object",
-              properties: { text: { type: "string" } },
-              required: ["text"],
+              description: "An object containing the key-value pairs to update (e.g., text, attributes, methods, etc.) based on the diagram type.",
+              properties: {
+                text: { type: "string" },
+                name: { type: "string" },
+                attributes: { type: "array", items: { type: "string" } },
+                methods: { type: "array", items: { type: "string" } },
+                property_to_change: { type: "string" },
+                new_value: { type: "string" }
+              },
               nullable: true,
             },
             new_element: {
               type: "object",
+              description: "An object containing properties for the new element, matching the diagram's specific structure.",
               properties: {
                 type: { type: "string" },
                 text: { type: "string" },
+                name: { type: "string" },
+                id: { type: "string" }
               },
-              required: ["type", "text"],
               nullable: true,
             },
             connections: {
               type: "array",
               items: {
                 type: "object",
+                description: "An object containing properties for a relationship or connection.",
                 properties: {
                   from: { type: "string" },
                   to: { type: "string" },
-                  label: { type: "string", nullable: true },
+                  label: { type: "string" },
+                  relationshipType: { type: "string" }
                 },
-                required: ["from", "to"],
+                required: ["from", "to"]
               },
               nullable: true,
             },
@@ -82,7 +93,7 @@ export const interpretPromptToInstruction = async (
         },
       },
     });
-    
+
     const response = result.response;
     if (
       !response.candidates ||
@@ -96,7 +107,7 @@ export const interpretPromptToInstruction = async (
       );
       throw new Error("Invalid response from AI: No content returned.");
     }
-    
+
     const content = response.candidates[0].content.parts[0].text;
     const parsedData = JSON.parse(content);
     return parsedData;
@@ -115,7 +126,7 @@ export const manipulateDiagramData = async (
 ) => {
   console.log("manipulateDiagramData - START");
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
     const systemPrompt = `You are an AI assistant designed to strictly modify diagram data (JSON) based on a structured JSON instruction.
                           Do not interpret natural language. Apply the changes precisely to the current_diagram_data.
                           Output only the modified diagram data JSON. Ensure the output is valid JSON.
@@ -161,7 +172,7 @@ export const manipulateDiagramData = async (
         responseSchema: selectedSchema,
       },
     });
-    
+
     const response = result.response;
     if (
       !response.candidates ||
@@ -175,7 +186,7 @@ export const manipulateDiagramData = async (
       );
       throw new Error("Invalid response from AI: No content returned.");
     }
-    
+
     const content = response.candidates[0].content.parts[0].text;
     const parsedData = JSON.parse(content);
     return parsedData;
