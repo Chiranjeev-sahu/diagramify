@@ -6,6 +6,7 @@ const diagramSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
     chatId: {
       type: String,
@@ -29,7 +30,7 @@ const diagramSchema = new Schema(
     },
     diagramType: {
       type: String,
-      enum: ["Flowchart", "Sequence", "ER", "Gantt"],
+      enum: ["Flowchart", "Sequence", "ER", "Gantt", "Class", "State"],
       required: true,
     },
     diagramData: {
