@@ -29,8 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
     _id: createdUser._id,
     username: createdUser.username,
     email: createdUser.email,
-    diagramsGenerated:
-      createdUser.diagramsGenerated.length || "No diagrams generated yet", // Ensure diagramsGenerated is included if it exists or defaults to 0
+    diagramsGenerated: createdUser.diagramsGenerated?.length ?? 0,
     createdAt: createdUser.createdAt,
     updatedAt: createdUser.updatedAt,
   };
@@ -60,19 +59,13 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
     throw new APIError(401, "Invalid user credentials");
   }
-// TODO: Refactor to remove duplicate user fetch - use destructuring instead
-
-  const loggedInUser = await User.findById(user._id);
-
   const userResponse = {
-    _id: loggedInUser._id,
-    username: loggedInUser.username,
-    email: loggedInUser.email,
-    diagramsGenerated: loggedInUser.diagramsGenerated.length
-      ? loggedInUser.diagramsGenerated
-      : 0,
-    createdAt: loggedInUser.createdAt,
-    updatedAt: loggedInUser.updatedAt,
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    diagramsGenerated: user.diagramsGenerated?.length ?? 0,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
   };
   return await sendAuthResponseWithTokens(
     res,
