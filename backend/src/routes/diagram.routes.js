@@ -18,11 +18,10 @@ diagramRouter.route("/generate").post(generateDiagrams);
 //to fetch latest versions for sidebar
 diagramRouter.route("/latest").get(getLatestVersions);
 
-// to fetch a specific diagram
-diagramRouter.route("/:id").get(getDiagramById);
-
-// to delete a specific diagram (deletes all versions with same chatId)
-diagramRouter.route("/:id").delete(deleteDiagram);
+// to fetch or delete a specific diagram
+diagramRouter.route("/:id")
+  .get(getDiagramById)
+  .delete(deleteDiagram);
 
 // for conversational editing (replaces diagram with new version)
 diagramRouter.route("/:id/reprompt").patch(repromptDiagram);
