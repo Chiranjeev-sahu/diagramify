@@ -1,5 +1,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
 import express, { urlencoded } from "express";
 import corsOptions from "./src/config/cors.config.js";
 import { errorMiddleware } from "./src/middleware/error.middleware.js";
@@ -9,6 +10,7 @@ import userRouter from "./src/routes/user.routes.js";
 import { generateDiagramsPublic } from "./src/controllers/diagram.controller.js";
 
 const app = express();
+app.use(helmet());
 app.set("trust proxy",1);
 app.use(express.json());
 app.use(urlencoded({ extended: true }));
