@@ -1,7 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function CodeEditor({ code, onChange, readOnly = false }) {
   const [copied, setCopied] = useState(false);
+  const [localCode, setLocalCode] = useState(code);
+
+  useEffect(() => {
+    setLocalCode(code);
+  }, [code]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (localCode !== code) {
+        onChange?.(localCode);
+      }
+    }, 500);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [localCode, code, onChange]);
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
     setCopied(true);
@@ -48,8 +65,8 @@ export default function CodeEditor({ code, onChange, readOnly = false }) {
         </div>
 
         <textarea
-          value={code}
-          onChange={(e) => onChange?.(e.target.value)}
+          value={localCode}
+          onChange={(e) => setLocalCode(e.target.value)}
           readOnly={readOnly}
           placeholder="// Your diagram code will appear here..."
           className="flex-1 px-4 py-4 bg-transparent text-slate-100 font-mono text-sm leading-6 whitespace-pre focus:outline-none resize-none overflow-hidden  placeholder:text-slate-500"

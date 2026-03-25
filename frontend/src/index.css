@@ -2,7 +2,7 @@
 
 /* Font Families */
 .font-instrument-serif {
-  font-family: 'Instrument Serif', serif;
+  font-family: "Instrument Serif", serif;
 }
 
 @keyframes shimmerSlide {
@@ -15,10 +15,12 @@
   0% {
     transform: translateZ(0) rotate(0);
   }
-  15%,35% {
+  15%,
+  35% {
     transform: translateZ(0) rotate(90deg);
   }
-  65%,85% {
+  65%,
+  85% {
     transform: translateZ(0) rotate(270deg);
   }
   100% {
@@ -26,12 +28,12 @@
   }
 }
 
-@keyframes shine-pulse{
+@keyframes shine-pulse {
   0% {
     background-position: 0% 0%;
   }
   50% {
-      background-position: 100% 100%;
+    background-position: 100% 100%;
   }
   to {
     background-position: 0% 0%;
@@ -70,7 +72,18 @@
     transform: translateY(0);
   }
 }
+@theme inline {
+  --animate-line-shadow: line-shadow 15s linear infinite;
 
+  @keyframes line-shadow {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 100% -100%;
+    }
+  }
+}
 /* Subtle blue glow effect */
 .glow-input {
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.12);
@@ -84,7 +97,7 @@
   outline: none;
 }
 
-@theme inline{
+@theme inline {
   --animate-shine-pulse: shine-pulse 6s linear infinite;
   --animate-fade-in: fade-in 0.5s ease-in-out;
   --animate-stagger-fade-in: fade-in 0.5s ease-out forwards;

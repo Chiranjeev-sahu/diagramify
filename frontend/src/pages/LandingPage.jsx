@@ -7,13 +7,13 @@ import { cn } from "@/utils/cn";
 export default function LandingPage() {
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center">
+    <div className="min-h-screen w-full flex items-center justify-center ">
       <div
         className={cn(
           "w-full max-w-6xl",
           "bg-[repeating-linear-gradient(-45deg,#e6e6e6_0,#e6e6e6_1px,transparent_0,transparent_50%)] bg-size-[10px_10px] bg-fixed",
           "flex flex-col items-center",
-          "bg-[#fdfdfd]"
+          "bg-[#fdfdfd] border border-slate-300"
         )}
       >
         <Navbar />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/utils/cn";
@@ -6,12 +6,47 @@ import { useTrialStore } from "@/store/useTrialStore";
 import apiClient from "@/api/apiClient";
 import ZoomableCanvas from "@/components/features/diagram/ZoomableCanvas";
 import DiagramPreview from "@/components/features/diagram/DiagramPreview";
-
+import { LineShadowText } from "@/components/ui/LineShadowText"
 export function Hero() {
   const [prompt, setPrompt] = useState("");
   const [diagramCode, setDiagramCode] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const { incrementTrial, hasTrialsLeft, getRemainingTrials } = useTrialStore();
+
+  const placeholders = [
+    "Create a flowchart for user authentication...",
+    "Draw a sequence diagram for an OAuth login flow...",
+    "Design a class diagram for a library management system...",
+    "Model an e-commerce checkout state machine...",
+    "Visualize a microservices architecture for a chat app..."
+  ];
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [currentPlaceholder, setCurrentPlaceholder] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
+
+  useEffect(() => {
+    let timeout;
+    const currentText = placeholders[placeholderIndex];
+    if (isTyping) {
+      if (currentPlaceholder.length < currentText.length) {
+        timeout = setTimeout(() => {
+          setCurrentPlaceholder(currentText.slice(0, currentPlaceholder.length + 1));
+        }, 60);
+      } else {
+        timeout = setTimeout(() => setIsTyping(false), 2500);
+      }
+    } else {
+      if (currentPlaceholder.length > 0) {
+        timeout = setTimeout(() => {
+          setCurrentPlaceholder(currentPlaceholder.slice(0, -1));
+        }, 30);
+      } else {
+        setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
+        setIsTyping(true);
+      }
+    }
+    return () => clearTimeout(timeout);
+  }, [currentPlaceholder, isTyping, placeholderIndex]);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -41,7 +76,6 @@ export function Hero() {
     } catch (error) {
       console.error("Error generating diagram:", error);
 
-      // Handle 429 rate limit error from backend
       if (error.response?.status === 429) {
         toast.error("Free trial limit reached! Please sign up to continue.");
       } else {
@@ -85,14 +119,14 @@ export function Hero() {
           </div>
 
           <h1
-            className="text-7xl sm:text-6xl lg:text-7xl text-zinc-950 font-instrument-serif tracking-tight"
+            className="text-7xl sm:text-6xl lg:text-7xl text-zinc-950  font-instrument-serif tracking-tight"
             style={{
               animation: 'slide-in-left 0.8s ease-out forwards',
               animationDelay: '0.1s',
               opacity: 0
             }}
           >
-            Convert Ideas to Diagrams with AI in <br /><span className="italic">Seconds</span>
+            Convert Ideas to Diagrams with AI in <br /><LineShadowText className="italic text-8xl">Seconds</LineShadowText>
           </h1>
 
           <p
@@ -106,7 +140,9 @@ export function Hero() {
             Instantly transform your thoughts into professional diagrams using advanced AI
           </p>
 
-          <div className="h-14" />
+
+
+          <div className="h-4" />
 
           <div
             className="w-full max-w-3xl"
@@ -124,7 +160,7 @@ export function Hero() {
 
             <div className="relative">
               <textarea
-                placeholder="Describe your diagram... (e.g., 'Create a flowchart for user authentication')"
+                placeholder={currentPlaceholder}
                 className={cn(
                   "w-full min-h-[140px] p-4 pb-14",
                   "border-2 rounded-2xl resize-none",
