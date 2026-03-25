@@ -89,7 +89,7 @@ export function Hero() {
   const remainingCredits = getRemainingTrials();
 
   return (
-    <section className="w-[95%] mx-auto relative border-x border-gray-300 bg-[#fefcf9] py-16 sm:py-20 lg:py-24 overflow-hidden">
+    <section className="w-[97%] mx-auto relative border-x border-gray-300 bg-[#fefcf9] py-16 sm:py-20 lg:py-24 overflow-hidden">
       {/* Dashed Grid Background */}
       <div
         className="absolute inset-0 z-0"
