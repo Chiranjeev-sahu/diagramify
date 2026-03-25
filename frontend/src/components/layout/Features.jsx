@@ -26,7 +26,7 @@ export function Features() {
   ];
 
   return (
-    <section className="w-[] mx-auto relative border-x border-gray-300 py-16 sm:py-20 bg-[#eff5fe] overflow-hidden">
+    <section className="w-[97%] mx-auto relative border-x border-gray-300 py-16 sm:py-20 bg-[#eff5fe] overflow-hidden">
       <div className="absolute inset-0 z-0" />
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl sm:text-4xl font-bold text-center mb-16 text-gray-900">
