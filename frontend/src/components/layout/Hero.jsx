@@ -61,45 +61,12 @@ export function Hero() {
         className="absolute inset-0 z-0"
         style={{
           backgroundImage: `
-            linear-gradient(to right, #e7e5e4 1px, transparent 1px),
-            linear-gradient(to bottom, #e7e5e4 1px, transparent 1px)
-          `,
-          backgroundSize: "20px 20px",
-          backgroundPosition: "0 0, 0 0",
-          maskImage: `
-            repeating-linear-gradient(
-              to right,
-              black 0px,
-              black 3px,
-              transparent 3px,
-              transparent 8px
-            ),
-            repeating-linear-gradient(
-              to bottom,
-              black 0px,
-              black 3px,
-              transparent 3px,
-              transparent 8px
-            )
-          `,
-          WebkitMaskImage: `
-            repeating-linear-gradient(
-              to right,
-              black 0px,
-              black 3px,
-              transparent 3px,
-              transparent 8px
-            ),
-            repeating-linear-gradient(
-              to bottom,
-              black 0px,
-              black 3px,
-              transparent 3px,
-              transparent 8px
-            )
-          `,
-          maskComposite: "intersect",
-          WebkitMaskComposite: "source-in",
+          linear-gradient(
+          rgb(255, 255, 255) 0%,
+          rgba(255, 255, 255, 0.8) 25%,
+          rgba(255, 250, 220, 0.6) 50%,
+          rgba(205, 181, 255, 0.7) 75%,
+          rgba(24, 131, 240, 0.9) 100%)`
         }}
       />
 
@@ -125,7 +92,7 @@ export function Hero() {
               opacity: 0
             }}
           >
-            Convert Ideas to Diagrams with AI in <br />Seconds
+            Convert Ideas to Diagrams with AI in <br /><span className="italic">Seconds</span>
           </h1>
 
           <p
@@ -165,7 +132,8 @@ export function Hero() {
                   "glow-input",
                   "transition-all duration-300",
                   "focus:outline-none",
-                  "bg-white"
+                  "bg-white",
+                  "shadow-md shadow-blue-800 ring-1 ring-blue-800"
                 )}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
