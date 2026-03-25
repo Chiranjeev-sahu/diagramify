@@ -16,7 +16,7 @@ export default function LandingPage() {
     >
       <div
         className={cn(
-          "w-full max-w-6xl",
+          "w-full max-w-7xl",
           "bg-[repeating-linear-gradient(-45deg,#e6e6e6_0,#e6e6e6_1px,transparent_0,transparent_50%)] bg-size-[10px_10px] bg-fixed",
           "flex flex-col items-center",
           "bg-[#fdfdfd] border border-slate-300"
