@@ -21,7 +21,7 @@ export function Navbar() {
       <header className="w-dvw bg-white border-b border-gray-300 flex justify-center items-center">
         <motion.div
           animate={{
-            width: scrolled ? "30%" : "100%",
+            width: scrolled ? "50%" : "100%",
             top: scrolled ? 20 : 0,
             borderRadius: scrolled ? 9999 : 0
           }}
