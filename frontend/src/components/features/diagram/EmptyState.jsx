@@ -74,8 +74,8 @@ export default function EmptyState() {
             className={cn(
               "absolute bottom-3 right-3",
               "px-6 py-2",
-              "bg-blue-500 text-white rounded-lg font-medium",
-              "hover:bg-blue-600",
+              "bg-blue-700 text-white rounded-lg font-medium",
+              "hover:bg-blue-800",
               "disabled:bg-gray-300 disabled:cursor-not-allowed",
               "transition-colors"
             )}

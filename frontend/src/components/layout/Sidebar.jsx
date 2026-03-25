@@ -102,7 +102,12 @@ export default function Sidebar() {
           navigate("/");
         }}
       >
-        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-110 transition-all duration-500 shadow-xl">
+        <div
+          className={cn(
+            "rounded-2xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-110 transition-all duration-500 shadow-xl",
+            sidebarCollapsed ? "w-10 h-10" : "w-12 h-12"
+          )}
+        >
           <img
             src="/logo.svg"
             alt="Logo"
