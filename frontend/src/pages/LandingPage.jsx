@@ -7,7 +7,13 @@ import { cn } from "@/utils/cn";
 export default function LandingPage() {
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center ">
+    <div className="min-h-screen w-full flex items-center justify-center "
+      style={{
+        background: "#ffffff",
+        backgroundImage: "radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.35) 1px, transparent 0)",
+        backgroundSize: "50px 50px",
+      }}
+    >
       <div
         className={cn(
           "w-full max-w-6xl",
