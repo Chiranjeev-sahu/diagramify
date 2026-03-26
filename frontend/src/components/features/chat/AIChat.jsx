@@ -159,14 +159,14 @@ export default function AIChat() {
               disabled={isGenerating}
               className="w-full pl-4 pr-12 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-sm disabled:opacity-50 transition-all shadow-sm group-hover:border-slate-300"
             />
-            <button
+            {/* <button
               type="button"
               className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
               title="Upload Image (Beta)"
               onClick={() => toast.info("Image search (Vision) feature coming soon!")}
             >
               <Paperclip size={18} />
-            </button>
+            </button> */}
           </div>
           <button
             type="submit"
