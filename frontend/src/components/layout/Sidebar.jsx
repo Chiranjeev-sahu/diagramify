@@ -128,7 +128,10 @@ export default function Sidebar() {
             e.stopPropagation();
             handleNewDiagram();
           }}
-          className="w-full flex items-center px-4 py-3 rounded-xl bg-[#1e293b] text-white gap-3 hover:bg-[#0f172a] transition-all border border-white/5 active:scale-[0.98] mt-2 shadow-lg shadow-blue-950/20"
+          className={cn(
+            "w-full flex items-center py-3 rounded-xl bg-[#1e293b] text-white gap-3 hover:bg-[#0f172a] transition-all border border-white/5 active:scale-[0.98] mt-2 shadow-lg shadow-blue-950/20",
+            sidebarCollapsed ? "px-3" : "px-4"
+          )}
         >
           <Plus className="w-5 h-5 shrink-0" />
           {!sidebarCollapsed && (
