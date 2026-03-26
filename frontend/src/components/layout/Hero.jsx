@@ -196,8 +196,8 @@ export function Hero() {
               </button>
             </div>
 
-            <p className="text-xs text-gray-500 text-center mt-2">
-              Press <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Ctrl</kbd> + <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">Enter</kbd> to generate
+            <p className="text-xs text-neutral-200 text-center mt-2">
+              Press <kbd className="px-2 py-1 backdrop-blur-sm border border-gray-300 rounded text-xs font-mono">Ctrl</kbd> + <kbd className="px-2 py-1 backdrop-blur-sm border border-gray-300 rounded text-xs font-mono">Enter</kbd> to generate
             </p>
           </div>
 
