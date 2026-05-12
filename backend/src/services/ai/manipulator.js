@@ -11,7 +11,7 @@ export const interpretPromptToInstruction = async (
 ) => {
   console.log("interpretPromptToInstruction - START");
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
     const systemPrompt = `You are an AI assistant designed to convert a user's natural language request for diagram modification into a structured JSON instruction.
                           The current diagram data is provided to help resolve references (e.g., node names to IDs).
                           Output only a JSON object following these rules:
